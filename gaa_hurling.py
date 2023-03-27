@@ -16,7 +16,10 @@ st.set_page_config(layout="wide")
 # st.write(gp.first())
 
 
-# df = pd.read_csv("C:/Users/Darragh/Documents/Python/gaa/gaa_results_hurling.csv")
+convert_excel_to_csv = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/hurling_2023.xlsx",sheet_name='Players',parse_dates=['Date'])
+convert_excel_to_csv.to_csv('C:/Users/Darragh/Documents/Python/gaa/hurling_2023_players_data.csv')
+
+
 df = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_hurling.xlsx",sheet_name='2022',parse_dates=['Date'])
 df_2021 = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_hurling.xlsx",sheet_name='2021',parse_dates=['Date'])
 df_2020 = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_hurling.xlsx",sheet_name='2020',parse_dates=['Date'])
