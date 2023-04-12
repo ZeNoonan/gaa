@@ -18,7 +18,8 @@ st.set_page_config(layout="wide")
 
 convert_excel_to_csv = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/hurling_2023.xlsx",sheet_name='Players',parse_dates=['Date'])
 convert_excel_to_csv.to_csv('C:/Users/Darragh/Documents/Python/gaa/hurling_2023_players_data.csv')
-
+odds = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/hurling_2023.xlsx",sheet_name='Odds',parse_dates=['Date'])
+odds.to_csv('C:/Users/Darragh/Documents/Python/gaa/hurling_2023_odds.csv')
 
 df = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_hurling.xlsx",sheet_name='2022',parse_dates=['Date'])
 df_2021 = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_hurling.xlsx",sheet_name='2021',parse_dates=['Date'])
