@@ -346,8 +346,8 @@ with st.expander('Workings for Team Totals'):
     test_df=updated_df.copy()
     test_df['at_home'] = 1
     test_df['at_away'] = -1
-    test_df['home_pts_adv'] = -3 # this is different to nfl/rugby cos of team total points
-    test_df['away_pts_adv'] = 3 # do i need to rethink this, bring in the spread
+    test_df['home_pts_adv'] = 0 # this is different to nfl/rugby cos of team total points
+    test_df['away_pts_adv'] = 0 # do i need to rethink this, bring in the spread
     test_df['away_spread']=test_df['Away_Total_Points']
     test_df=test_df.rename(columns={'Home_Total_Points':'home_spread'})
     test_df['Away Spread'] = - test_df['Spread']
@@ -359,7 +359,20 @@ with st.expander('Workings for Team Totals'):
     test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True)
     test_df_2=test_df_2.sort_values(by=['ID','Week'],ascending=True)
     test_df_2['spread_with_home_adv']=test_df_2['spread']+test_df_2['home_pts_adv']
-    st.write('test_df_2', test_df_2)
+    test_df_3=test_df_2.dropna(subset=['spread'])
+    test_df_3['n'] = test_df_3.groupby('ID').cumcount() // 4
+    st.write('test_df_2', test_df_3)
+    # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
+    test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
+    # st.write('test spread',test_df_3['spread'],'test points',test_df_3['spread_with_home_adv'])
+    st.write('regression seems to work',np.polyfit([-.5,-2.5,-3,-7.5], [25.5,24.5,26.5,29.5], 1))
+    st.write('test_df_3 wont work cos its a fixed window I want a rolling 4 game window', test_df_3)
+    groupby_object = test_df_3.groupby('ID')['Spread','spread_with_home_adv'].rolling(4, min_periods=4)
+    for x in groupby_object:
+        st.write('x',x)
+        st.write('regresssion',np.polyfit(x['Spread'], x['spread_with_home_adv'], 1))
+
 
 with st.expander('Season to Date Cover Factor by Team'):
     st.write('Positive number means the number of games to date that you have covered the spread; in other words teams with a positive number have beaten expectations')
