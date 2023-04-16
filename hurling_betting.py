@@ -368,11 +368,26 @@ with st.expander('Workings for Team Totals'):
     # st.write('test spread',test_df_3['spread'],'test points',test_df_3['spread_with_home_adv'])
     st.write('regression seems to work',np.polyfit([-.5,-2.5,-3,-7.5], [25.5,24.5,26.5,29.5], 1))
     st.write('test_df_3 wont work cos its a fixed window I want a rolling 4 game window', test_df_3)
-    groupby_object = test_df_3.groupby('ID')['Spread','spread_with_home_adv'].rolling(4, min_periods=4)
-    for x in groupby_object:
-        st.write('x',x)
-        st.write('regresssion',np.polyfit(x['Spread'], x['spread_with_home_adv'], 1))
+    # groupby_object = test_df_3.groupby('ID')['Spread','spread_with_home_adv'].rolling(4, min_periods=4)
+    # groupby_object = test_df_3.groupby('ID').rolling(4, min_periods=4)
+    groupby_object = test_df_3.groupby('ID')
+    # does_this_work = 
+    # for x,y in groupby_object:
+        # y['test']=1
+        # st.write(y['Spread'].rolling(4, min_periods=4))
+        # def test_func(x)
+        # y['test 2']=np.polyfit(x['Spread'].rolling(4, min_periods=4), x['spread_with_home_adv'].rolling(4, min_periods=4), 1)
+        # st.write(np.polyfit(x['Spread'].rolling(4, min_periods=4), x['spread_with_home_adv'].rolling(4, min_periods=4), 1))
+        # st.write('number',x, 'Per ID',y)
+    
+        # st.write('regresssion',np.polyfit(x['Spread'], x['spread_with_home_adv'], 1))
 
+    # https://stackoverflow.com/questions/28465850/rolling-window-polynomial-fit-in-pandas
+    my_ts = pd.Series(data = np.random.normal(size = 10 * 1), index = pd.date_range(start = '2013-01-01', periods = 10 * 1))
+    st.write('my ts', my_ts)
+    my_ts['test'] = my_ts.rolling(4, min_periods=4).apply(lambda x: np.polyfit(range(len(x)), x, 3)[0])
+    st.write('coefs', my_ts)
+    # coefs = pd.rolling_apply(my_ts, 21, lambda x: np.polyfit(range(len(x)), x, 3))
 
 with st.expander('Season to Date Cover Factor by Team'):
     st.write('Positive number means the number of games to date that you have covered the spread; in other words teams with a positive number have beaten expectations')
