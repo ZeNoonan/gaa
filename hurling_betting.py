@@ -373,11 +373,12 @@ with st.expander('Workings for Team Totals'):
     groupby_object = test_df_3.groupby('ID')
     # does_this_work = 
     # for x,y in groupby_object:
-        # y['test']=1
-        # st.write(y['Spread'].rolling(4, min_periods=4))
-        # def test_func(x)
-        # y['test 2']=np.polyfit(x['Spread'].rolling(4, min_periods=4), x['spread_with_home_adv'].rolling(4, min_periods=4), 1)
-        # st.write(np.polyfit(x['Spread'].rolling(4, min_periods=4), x['spread_with_home_adv'].rolling(4, min_periods=4), 1))
+    #     y['test']=1
+    #     st.write('y',y)
+    #     # st.write(y['Spread'].rolling(4, min_periods=4))
+    #     # def test_func(x)
+    #     # y['test 2']=np.polyfit(x['Spread'].rolling(4, min_periods=4), x['spread_with_home_adv'].rolling(4, min_periods=4), 1)
+    #     st.write(np.polyfit(y['Spread'].rolling(4, min_periods=4), y['spread_with_home_adv'].rolling(4, min_periods=4), 1))
         # st.write('number',x, 'Per ID',y)
     
         # st.write('regresssion',np.polyfit(x['Spread'], x['spread_with_home_adv'], 1))
