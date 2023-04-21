@@ -366,7 +366,14 @@ with st.expander('Workings for Team Totals'):
     test_df_3['pts_spread_estimate']=test_df_3['estimated_pts_1']+test_df_3['estimated_pts']
     pts_estimate_df=test_df_3.loc[:,['Week','Date','ID','pts_spread_estimate']]
     st.write('to merge into betting df', pts_estimate_df)
-    
+    pts_spread_home=pts_estimate_df.rename(columns={'ID':'Home ID'})
+    # stdc_home['cover_sign']=-stdc_home['cover_sign']
+    pts_spread_away=pts_estimate_df.rename(columns={'ID':'Away ID'})
+    # st.write('updated df', updated_df,'cols', updated_df.columns)
+    # st.write('pts spread home', pts_spread_home,'cols', pts_spread_home.columns)
+    updated_df=updated_df.merge(pts_spread_home,on=['Date','Week','Home ID'],how='left').rename(columns={'pts_spread_estimate':'home_pts_spread_estimate'})
+    updated_df=updated_df.merge(pts_spread_away,on=['Date','Week','Away ID'],how='left').rename(columns={'pts_spread_estimate':'away_pts_spread_estimate'})
+
     # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
     test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
     st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
@@ -404,9 +411,11 @@ with st.expander('Season to Date Cover Factor by Team'):
     st.write('Positive number means the number of games to date that you have covered the spread; in other words teams with a positive number have beaten expectations')
     st.write('Negative number means the number of games to date that you have not covered the spread; in other words teams with a negative number have performed below expectations')
     st.write('blanks in graph are where the team got a bye week')
+    st.write('spread 3', spread_3)
     stdc_home=spread_3.rename(columns={'ID':'Home ID'})
     stdc_home['cover_sign']=-stdc_home['cover_sign']
     stdc_away=spread_3.rename(columns={'ID':'Away ID'})
+    st.write('updated df', updated_df)
     updated_df=updated_df.drop(['away_cover'],axis=1)
     updated_df=updated_df.rename(columns={'home_cover':'home_cover_result'})
     # st.write('line 352 before merge', updated_df)
@@ -551,6 +560,7 @@ with placeholder_2.expander('Betting Slip Matches'):
     updated_df=pd.merge(updated_df,sin_bin_extract_to_merge,on=['Week','Home Team','Away Team','Spread'],how='outer')
     updated_df=pd.merge(updated_df,penalty_extract_to_merge,on=['Week','Home Team','Away Team','Spread'],how='outer')
     st.write('updated df', updated_df)
+    st.write('pts estimate to merge', pts_estimate_df)
     updated_df=pd.merge(updated_df,pts_estimate_df,on=['Week','Date','ID'],how='outer')
     updated_df['momentum_pick']=np.where(updated_df['Spread']==updated_df['Opening Spread'],0,np.where(
     updated_df['Spread']<updated_df['Opening Spread'],1,-1))
