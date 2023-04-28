@@ -525,43 +525,44 @@ with st.expander('Workings for Team Totals'):
     updated_df['total_pts_pick'] = np.where(updated_df['total_est_pts']>updated_df['Closing_Total'],1,-1)
     updated_df['totals_cover'] = np.where(updated_df['total_pts']>updated_df['Closing_Total'],1,-1)
     updated_df['totals_bet_result'] = updated_df['total_pts_pick'] * updated_df['totals_cover']
+    
+    updated_df['home_pts_pick'] = np.where(updated_df['home_pts_spread_estimate']>updated_df['Home_Total_Points'],1,-1)
+    updated_df['away_pts_pick'] = np.where(updated_df['away_pts_spread_estimate']>updated_df['Away_Total_Points'],1,-1)
+    updated_df['home_pts_cover'] = np.where(updated_df['Home Points']>updated_df['Home_Total_Points'],1,-1)
+    updated_df['away_pts_cover'] = np.where(updated_df['Away Points']>updated_df['Away_Total_Points'],1,-1)
+    updated_df['home_pts_bet_result'] = updated_df['home_pts_pick'] * updated_df['home_pts_cover']
+    updated_df['away_pts_bet_result'] = updated_df['away_pts_pick'] * updated_df['away_pts_cover']
+
+
+
     cols_to_move=['Week','Date','Home Team','Away Team','Spread','Home Points','Away Points','total_pts','Closing_Total','total_est_pts',
                   'total_pts_pick','totals_cover','totals_bet_result',
-                  'home_pts_spread_estimate','away_pts_spread_estimate']
+                  'home_pts_spread_estimate','Home_Total_Points','home_pts_pick','away_pts_spread_estimate','away_pts_pick','Away_Total_Points']
     cols = cols_to_move + [col for col in updated_df if col not in cols_to_move]
+    
+    # updated_df=updated_df[cols].sort_values(by=['Date','Home ID']).dropna(subset=['Closing_Total'])
     updated_df=updated_df[cols].sort_values(by=['Date','Home ID'])
-    st.write('team totals', updated_df)
+
+
+    st.write('team totals', updated_df.set_index(['Home Team','Away Team']))
     # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
+    # st.write('test df 3', test_df_3)
     test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
     st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
     
     # weekly_results=updated_df.groupby(['Week','totals_bet_result']).agg(winning=('totals_bet_result','sum'),count=('totals_bet_result','count'))
-    weekly_results=updated_df.rename(columns={'totals_bet_result':'result'}).groupby(['Week','result']).agg(winning=('result','sum'),count=('result','count'))
+    weekly_results=updated_df.rename(columns={'totals_bet_result':'result'}).dropna(subset=['Closing_Total']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
+    weekly_results['total_result']=weekly_results['winning'].cumsum()
     st.write('weekly results', weekly_results)
-    # weekly_test=analysis[analysis['total_factor'].abs()>2].loc[:,['Week','result']].copy()
-    # df9 = weekly_test.groupby(['result','Week']).size().unstack(fill_value=0)
-    df9=weekly_results.reset_index()
-    df9['result']=df9['result'].round(1).astype(str)
-    df9=df9.set_index('result').sort_index(ascending=False)
-    df9['grand_total']=df9.sum(axis=1)
-    st.write('df9', df9)
-    df9.loc['Winning_Bets']=(df9.loc['1'])
-    df9.loc['Losing_Bets']=(df9.loc['-1'])
-    df9.loc['No. of Bets Made'] = df9.loc['1']+ df9.loc['-1']
-    df9.loc['PL_Bets']=df9.loc['Winning_Bets'] - df9.loc['Losing_Bets']
-    df9=df9.apply(pd.to_numeric, downcast='float')
-    graph_pl_data=df9.loc[['PL_Bets'],:].drop('grand_total',axis=1)
-    graph_pl_data=graph_pl_data.stack().reset_index().drop('result',axis=1).rename(columns={0:'week_result'})
-    graph_pl_data['Week']=graph_pl_data['Week'].astype(int)
-    graph_pl_data['total_result']=graph_pl_data['week_result'].cumsum()
-    graph_pl_data=graph_pl_data.melt(id_vars='Week',var_name='category',value_name='result')
-    df9.loc['% Winning'] = ((df9.loc['1']) / (df9.loc['1'] + df9.loc['-1']) ).replace({'<NA>':np.NaN})
-    table_test=df9.copy()
-    # https://stackoverflow.com/questions/64428836/use-pandas-style-to-format-index-rows-of-dataframe
-    df9 = df9.style.format("{:.1f}", na_rep='-')
-    df9 = df9.format(formatter="{:.0%}", subset=pd.IndexSlice[['% Winning'], :]).format(formatter="{:.0f}", subset=pd.IndexSlice[['1'], :]) \
-        .format(formatter="{:.0f}", subset=pd.IndexSlice[['-1'], :])
-        # .format(formatter="{:.0f}", subset=pd.IndexSlice[['-0.0'], :]) \
+
+    home_pts_results=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
+    home_pts_results['total_result']=home_pts_results['winning'].cumsum()
+    st.write('home weekly results', home_pts_results)
+
+    away_pts_results=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
+    away_pts_results['total_result']=away_pts_results['winning'].cumsum()
+    st.write('away weekly results', away_pts_results)
+
 
     def graph_pl(decile_df_abs_home_1,column):
         line_cover= alt.Chart(decile_df_abs_home_1).mark_line().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
@@ -571,11 +572,8 @@ with st.expander('Workings for Team Totals'):
         vline = alt.Chart(overlay).mark_rule(color='black', strokeWidth=1).encode(y=column)
         return st.altair_chart(line_cover + text_cover + vline,use_container_width=True)
 
-    graph_pl(graph_pl_data,column='result')
+    # graph_pl(graph_pl_data,column='result')
 
-    st.write('Total betting result per Betting Table',betting_matches['result'].sum())
-    st.write('Total betting result per Above Table',table_test.loc['PL_Bets','grand_total'])
-    st.write(df9)
     
     
     # st.write('test spread',test_df_3['spread'],'test points',test_df_3['spread_with_home_adv'])
