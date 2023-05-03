@@ -15,7 +15,7 @@ season_picker = st.selectbox("Select a season to run",('season_2022','season_202
 placeholder_1=st.empty()
 placeholder_2=st.empty()
 
-finished_week=6
+finished_week=7
 last_week=2 # what is this for?? its for graphing i think
 number_of_teams=12
 min_factor=2
@@ -703,7 +703,7 @@ with placeholder_2.expander('Betting Slip Matches'):
     presentation_betting_matches=betting_matches.copy()
 
     # https://towardsdatascience.com/7-reasons-why-you-should-use-the-streamlit-aggrid-component-2d9a2b6e32f0
-    grid_height = st.number_input("Grid height", min_value=400, value=4850, step=100)
+    grid_height = st.number_input("Grid height", min_value=400, value=5850, step=100)
     gb = GridOptionsBuilder.from_dataframe(presentation_betting_matches)
     gb.configure_column("Spread", type=["numericColumn","numberColumnFilter","customNumericFormat"], precision=1, aggFunc='sum')
     gb.configure_column("home_power", type=["numericColumn","numberColumnFilter","customNumericFormat"], precision=1, aggFunc='sum')
