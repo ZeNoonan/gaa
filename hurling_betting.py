@@ -562,7 +562,8 @@ with st.expander('Workings for Team Totals'):
     away_pts_results=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
     away_pts_results['total_result']=away_pts_results['winning'].cumsum()
     st.write('away weekly results', away_pts_results)
-
+    away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    away_pts_graph['total_result']=away_pts_graph['winning'].cumsum()
 
     def graph_pl(decile_df_abs_home_1,column):
         line_cover= alt.Chart(decile_df_abs_home_1).mark_line().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
