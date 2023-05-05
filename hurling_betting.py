@@ -550,21 +550,6 @@ with st.expander('Workings for Team Totals'):
     test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
     st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
     
-    # weekly_results=updated_df.groupby(['Week','totals_bet_result']).agg(winning=('totals_bet_result','sum'),count=('totals_bet_result','count'))
-    weekly_results=updated_df.rename(columns={'totals_bet_result':'result'}).dropna(subset=['Closing_Total']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
-    weekly_results['total_result']=weekly_results['winning'].cumsum()
-    st.write('weekly results', weekly_results)
-
-    home_pts_results=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
-    home_pts_results['total_result']=home_pts_results['winning'].cumsum()
-    st.write('home weekly results', home_pts_results)
-
-    away_pts_results=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
-    away_pts_results['total_result']=away_pts_results['winning'].cumsum()
-    st.write('away weekly results', away_pts_results)
-    away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
-    away_pts_graph['total_result']=away_pts_graph['winning'].cumsum()
-
     def graph_pl(decile_df_abs_home_1,column):
         line_cover= alt.Chart(decile_df_abs_home_1).mark_line().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
         alt.Y(column),color=alt.Color('category'))
@@ -573,7 +558,37 @@ with st.expander('Workings for Team Totals'):
         vline = alt.Chart(overlay).mark_rule(color='black', strokeWidth=1).encode(y=column)
         return st.altair_chart(line_cover + text_cover + vline,use_container_width=True)
 
-    # graph_pl(graph_pl_data,column='result')
+
+    # weekly_results=updated_df.groupby(['Week','totals_bet_result']).agg(winning=('totals_bet_result','sum'),count=('totals_bet_result','count'))
+    weekly_results=updated_df.rename(columns={'totals_bet_result':'result'}).dropna(subset=['Closing_Total']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    weekly_results['total_result']=weekly_results['winning'].cumsum()
+    graph_pl_data=weekly_results.melt(id_vars='Week',var_name='category',value_name='result')
+    st.write('Totals results')
+    graph_pl(graph_pl_data,column='result')
+    
+
+    # home_pts_results=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
+    # home_pts_results['total_result']=home_pts_results['winning'].cumsum()
+    # # st.write('home weekly results', home_pts_results)
+
+    # away_pts_results=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
+    # away_pts_results['total_result']=away_pts_results['winning'].cumsum()
+    # st.write('away weekly results', away_pts_results)
+
+
+    # away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    # home_pts_graph=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    
+    away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points'])
+    home_pts_graph=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points'])
+    
+    pts_graph_result=pd.concat([away_pts_graph,home_pts_graph]).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    pts_graph_result['total_result']=pts_graph_result['winning'].cumsum()
+    st.write('Team pts_graph_result')
+    graph_pl_data=pts_graph_result.melt(id_vars='Week',var_name='category',value_name='result')
+
+
+    graph_pl(graph_pl_data,column='result')
 
     
     
