@@ -489,7 +489,7 @@ with st.expander('Penalty Factor by Match Graph'):
 #         updated_df_with_momentum['Spread']<updated_df_with_momentum['Opening Spread'],1,-1))
 
 with st.expander('Workings for Team Totals'):
-    # st.write('updated_df', updated_df)
+    st.write('updated_df', updated_df)
     test_df=updated_df.copy()
     test_df['at_home'] = 1
     test_df['at_away'] = -1
@@ -511,6 +511,7 @@ with st.expander('Workings for Team Totals'):
     test_df_3['estimated_pts']=(test_df_3['Spread']*-.5218)
     test_df_3['estimated_pts_1']=24.64
     test_df_3['pts_spread_estimate']=test_df_3['estimated_pts_1']+test_df_3['estimated_pts']
+    st.write('checking calc of totals', AgGrid(test_df_3))
     pts_estimate_df=test_df_3.loc[:,['Week','Date','ID','pts_spread_estimate']]
     # st.write('to merge into betting df', pts_estimate_df)
     pts_spread_home=pts_estimate_df.rename(columns={'ID':'Home ID'})
