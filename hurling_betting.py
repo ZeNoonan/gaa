@@ -499,9 +499,9 @@ with st.expander('Workings for Team Totals'):
     test_df=test_df.rename(columns={'Home_Total_Points':'home_spread'})
     test_df['Away Spread'] = - test_df['Spread']
     test_df=test_df.rename(columns={'Spread':'Home Spread'})
-    test_df_1=test_df.loc[:,['Week','Date','Home ID','Away ID','at_home','at_away','home_spread','away_spread','home_pts_adv','away_pts_adv', 'Home Spread', 'Away Spread']].copy()
-    test_df_home=test_df_1.loc[:,['Week','Date','Home ID','at_home','home_spread','home_pts_adv','Home Spread']].rename(columns={'Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'spread','home_pts_adv':'home_pts_adv'}).copy()
-    test_df_away=test_df_1.loc[:,['Week','Date','Away ID','at_away','away_spread','away_pts_adv','Away Spread']].rename(columns={'Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'spread','away_pts_adv':'home_pts_adv'}).copy()
+    test_df_1=test_df.loc[:,['Week','Date','Home ID','Away ID','at_home','at_away','home_spread','away_spread','home_pts_adv','away_pts_adv', 'Home Spread', 'Away Spread','Closing_Total']].copy()
+    test_df_home=test_df_1.loc[:,['Week','Date','Home ID','at_home','home_spread','home_pts_adv','Home Spread','Closing_Total']].rename(columns={'Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'spread','home_pts_adv':'home_pts_adv'}).copy()
+    test_df_away=test_df_1.loc[:,['Week','Date','Away ID','at_away','away_spread','away_pts_adv','Away Spread','Closing_Total']].rename(columns={'Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'spread','away_pts_adv':'home_pts_adv'}).copy()
     # st.write('test home 253', test_df_home, 'away', test_df_away)
     test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True)
     test_df_2=test_df_2.sort_values(by=['ID','Week'],ascending=True)
@@ -522,7 +522,8 @@ with st.expander('Workings for Team Totals'):
     updated_df=updated_df.merge(pts_spread_home,on=['Date','Week','Home ID'],how='left').rename(columns={'pts_spread_estimate':'home_pts_spread_estimate'})
     updated_df=updated_df.merge(pts_spread_away,on=['Date','Week','Away ID'],how='left').rename(columns={'pts_spread_estimate':'away_pts_spread_estimate'})
     updated_df['total_pts']=updated_df['Home Points']+updated_df['Away Points']
-    updated_df['total_est_pts'] = updated_df['home_pts_spread_estimate']+updated_df['away_pts_spread_estimate']
+    # updated_df['total_est_pts'] = updated_df['home_pts_spread_estimate']+updated_df['away_pts_spread_estimate']
+    updated_df['total_est_pts'] = (updated_df['Spread'].abs()*0.1976)+48.6353
     updated_df['total_pts_pick'] = np.where(updated_df['total_est_pts']>updated_df['Closing_Total'],1,-1)
     updated_df['totals_cover'] = np.where(updated_df['total_pts']>updated_df['Closing_Total'],1,-1)
     updated_df['totals_bet_result'] = updated_df['total_pts_pick'] * updated_df['totals_cover']
@@ -549,7 +550,13 @@ with st.expander('Workings for Team Totals'):
     # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
     # st.write('test df 3', test_df_3)
     test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    # st.write('df_3', test_df_3)
     st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
+    # st.write('regression Totals',np.polyfit(test_df_3['Spread'], test_df_3['Closing_Total'], 1))
+    st.write('regression Totals',np.polyfit(test_df_3['Spread'].abs(), test_df_3['Closing_Total'], 1))
+
+
+
     
     def graph_pl(decile_df_abs_home_1,column):
         line_cover= alt.Chart(decile_df_abs_home_1).mark_line().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
@@ -591,7 +598,13 @@ with st.expander('Workings for Team Totals'):
 
     graph_pl(graph_pl_data,column='result')
 
-    
+    # grouped_id_working=[]
+    # # game_weights = iter([-0.125, -0.25,-0.5,-1])
+    # for name, group in updated_df:
+    #     # group['game_adj']=next(game_weights)
+    #     grouped_id_working.append(group)
+
+    # df_working_group = pd.concat(grouped_id_working, ignore_index=True)
     
     # st.write('test spread',test_df_3['spread'],'test points',test_df_3['spread_with_home_adv'])
     # st.write('regression seems to work',np.polyfit([-.5,-2.5,-3,-7.5], [25.5,24.5,26.5,29.5], 1))
