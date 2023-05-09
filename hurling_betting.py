@@ -549,7 +549,9 @@ with st.expander('Workings for Team Totals'):
     st.write('team totals', updated_df.set_index(['Home Team','Away Team']))
     # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
     # st.write('test df 3', test_df_3)
-    test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    # test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
     # st.write('df_3', test_df_3)
     st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
     # st.write('regression Totals',np.polyfit(test_df_3['Spread'], test_df_3['Closing_Total'], 1))
@@ -598,11 +600,32 @@ with st.expander('Workings for Team Totals'):
 
     graph_pl(graph_pl_data,column='result')
 
-    # grouped_id_working=[]
-    # # game_weights = iter([-0.125, -0.25,-0.5,-1])
-    # for name, group in updated_df:
-    #     # group['game_adj']=next(game_weights)
-    #     grouped_id_working.append(group)
+    grouped_id_working=[]
+    
+    df = pd.DataFrame({'col1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10]})
+    st.write('df',df)
+    # Try to bin the data into 4 equal bins using qcut, but fail due to duplicate edges
+    df['quartile'] = pd.qcut(df['col1'], q=4)
+    st.write('df',df)
+
+
+    # test_df_3['quartile']=pd.qcut(test_df_3['Spread'],q=10,labels=False)
+    st.write('test df 3', test_df_3)
+    # st.write(test_df_3.groupby('quartile')['Spread'].apply(list))
+    filtered_positive_spread=test_df_3.loc[test_df_3['Spread']>0.1]
+    filtered_positive_spread['quartile']=pd.qcut(filtered_positive_spread['Spread'],q=8,labels=False)
+    st.write('filtered postive spread', filtered_positive_spread)
+    filtered_negative_spread=test_df_3.loc[test_df_3['Spread']<0.1]
+    
+    
+    filtered_negative_spread['quartile']=pd.qcut(filtered_negative_spread['Spread'],q=8,labels=False)
+    st.write(filtered_positive_spread.groupby('quartile')['Spread'].apply(list))
+    st.write(filtered_negative_spread.groupby('quartile')['Spread'].apply(list))
+
+    for name, group in test_df_3.groupby('ID'):
+        pass
+        # st.write('group', group)
+        # grouped_id_working.append(group)
 
     # df_working_group = pd.concat(grouped_id_working, ignore_index=True)
     
