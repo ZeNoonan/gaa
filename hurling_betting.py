@@ -507,7 +507,7 @@ with st.expander('Workings for Team Totals'):
     test_df_2=test_df_2.sort_values(by=['ID','Week'],ascending=True)
     test_df_2['spread_with_home_adv']=test_df_2['spread']+test_df_2['home_pts_adv']
     test_df_3=test_df_2.dropna(subset=['spread'])
-    test_df_3['n'] = test_df_3.groupby('ID').cumcount() // 4
+    # test_df_3['n'] = test_df_3.groupby('ID').cumcount() // 4
     test_df_3['estimated_pts']=(test_df_3['Spread']*-.5218)
     test_df_3['estimated_pts_1']=24.64
     test_df_3['pts_spread_estimate']=test_df_3['estimated_pts_1']+test_df_3['estimated_pts']
@@ -602,23 +602,29 @@ with st.expander('Workings for Team Totals'):
 
     grouped_id_working=[]
     
-    df = pd.DataFrame({'col1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10]})
-    st.write('df',df)
-    # Try to bin the data into 4 equal bins using qcut, but fail due to duplicate edges
-    df['quartile'] = pd.qcut(df['col1'], q=4)
-    st.write('df',df)
+    # df = pd.DataFrame({'col1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10]})
+    # st.write('df',df)
+    # # Try to bin the data into 4 equal bins using qcut, but fail due to duplicate edges
+    # df['quartile'] = pd.qcut(df['col1'], q=4)
+    # st.write('df',df)
 
 
     # test_df_3['quartile']=pd.qcut(test_df_3['Spread'],q=10,labels=False)
     st.write('test df 3', test_df_3)
     # st.write(test_df_3.groupby('quartile')['Spread'].apply(list))
-    filtered_positive_spread=test_df_3.loc[test_df_3['Spread']>0.1]
-    filtered_positive_spread['quartile']=pd.qcut(filtered_positive_spread['Spread'],q=8,labels=False)
-    st.write('filtered postive spread', filtered_positive_spread)
-    filtered_negative_spread=test_df_3.loc[test_df_3['Spread']<0.1]
+    filtered_positive_spread=test_df_3.loc[test_df_3['Spread']>0.1].drop(['slope','coeffic'],axis=1)
+    quantile_spread=4
+    filtered_positive_spread['quartile']=pd.qcut(filtered_positive_spread['Spread'],q=quantile_spread,labels=False)
+    st.write('filtered postive spread before', filtered_positive_spread.sort_values(by='quartile'))
+    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['ID', 'quartile'])\
+                                                            .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['ID', 'quartile'])\
+                                                            .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
+    st.write('filtered postive spread after NOT WORKING??', filtered_positive_spread.sort_values(by='quartile'))
+    filtered_negative_spread=test_df_3.loc[test_df_3['Spread']<0.1].drop(['slope','coeffic'],axis=1)
     
     
-    filtered_negative_spread['quartile']=pd.qcut(filtered_negative_spread['Spread'],q=8,labels=False)
+    filtered_negative_spread['quartile']=pd.qcut(filtered_negative_spread['Spread'],q=quantile_spread,labels=False)
     st.write(filtered_positive_spread.groupby('quartile')['Spread'].apply(list))
     st.write(filtered_negative_spread.groupby('quartile')['Spread'].apply(list))
 
