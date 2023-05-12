@@ -610,31 +610,35 @@ with st.expander('Workings for Team Totals'):
 
 
     # test_df_3['quartile']=pd.qcut(test_df_3['Spread'],q=10,labels=False)
-    st.write('test df 3', test_df_3)
+    # st.write('test df 3', test_df_3)
     # st.write(test_df_3.groupby('quartile')['Spread'].apply(list))
     filtered_positive_spread=test_df_3.loc[test_df_3['Spread']>0.1].drop(['slope','coeffic'],axis=1)
     quantile_spread=4
     filtered_positive_spread['quartile']=pd.qcut(filtered_positive_spread['Spread'],q=quantile_spread,labels=False)
     # st.write('filtered postive spread before', filtered_positive_spread.sort_values(by='quartile'))
-    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['ID', 'quartile'])\
+    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['quartile'])\
                                                             .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
-    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['ID', 'quartile'])\
+    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['quartile'])\
                                                             .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
     
 
+    st.write(filtered_positive_spread.groupby('quartile')['Spread'].apply(list))
+    st.write('filtered postive spread after NOT WORKING?? TO CHECK', filtered_positive_spread.sort_values(by='quartile'))
+
     filtered_negative_spread=test_df_3.loc[test_df_3['Spread']<0.1].drop(['slope','coeffic'],axis=1)
     filtered_negative_spread['quartile']=pd.qcut(filtered_negative_spread['Spread'],q=quantile_spread,labels=False)
-    filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['ID', 'quartile'])\
+    st.write('filtered negative spread whats wrong', filtered_negative_spread)
+    filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
                                                             .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
-    filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['ID', 'quartile'])\
+    filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
                                                             .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
 
 
 
-    st.write(filtered_positive_spread.groupby('quartile')['Spread'].apply(list))
+    
     st.write(filtered_negative_spread.groupby('quartile')['Spread'].apply(list))
 
-    st.write('filtered postive spread after NOT WORKING?? TO CHECK', filtered_positive_spread.sort_values(by='quartile'))
+    
     st.write('filtered negative spread TO CHECK', filtered_negative_spread.sort_values(by='quartile'))
     
 
