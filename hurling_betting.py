@@ -15,7 +15,7 @@ season_picker = st.selectbox("Select a season to run",('season_2022','season_202
 placeholder_1=st.empty()
 placeholder_2=st.empty()
 
-finished_week=7
+finished_week=8
 last_week=2 # what is this for?? its for graphing i think
 number_of_teams=12
 min_factor=2
