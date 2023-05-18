@@ -506,13 +506,32 @@ with st.expander('Workings for Team Totals'):
     test_df=test_df.rename(columns={'Home_Total_Points':'home_spread'})
     test_df['Away Spread'] = - test_df['Spread']
     test_df=test_df.rename(columns={'Spread':'Home Spread'})
-    test_df_1=test_df.loc[:,['Week','Date','Home ID','Away ID','at_home','at_away','home_spread','away_spread','home_pts_adv','away_pts_adv', 'Home Spread', 'Away Spread','Closing_Total']].copy()
-    test_df_home=test_df_1.loc[:,['Week','Date','Home ID','at_home','home_spread','home_pts_adv','Home Spread','Closing_Total']].rename(columns={'Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'spread','home_pts_adv':'home_pts_adv'}).copy()
-    test_df_away=test_df_1.loc[:,['Week','Date','Away ID','at_away','away_spread','away_pts_adv','Away Spread','Closing_Total']].rename(columns={'Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'spread','away_pts_adv':'home_pts_adv'}).copy()
+    test_df_1=test_df.loc[:,['Week','Date','Home ID','Away ID','at_home','at_away','home_spread','away_spread','home_pts_adv','away_pts_adv',
+                              'Home Spread', 'Away Spread','Closing_Total']].copy()
+    use_test=test_df_1.copy()
+    test_df_home=test_df_1.loc[:,['Week','Date','Home ID','at_home','home_spread','home_pts_adv','Home Spread','Closing_Total','Away ID']]\
+    .rename(columns={'Away ID':'Away_Team_ID','Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'spread','home_pts_adv':'home_pts_adv'}).copy()
+
+    test_df_away=test_df_1.loc[:,['Week','Date','Away ID','at_away','away_spread','away_pts_adv','Away Spread','Closing_Total','Home ID']]\
+        .rename(columns={'Home ID':'Home_Team_ID','Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'spread','away_pts_adv':'home_pts_adv'}).copy()
+    
     # st.write('test home 253', test_df_home, 'away', test_df_away)
     test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True)
     test_df_2=test_df_2.sort_values(by=['ID','Week'],ascending=True)
+
+    test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
+    st.write('Be careful of the below as it throws a wierd result for Antrim ')
+    test_df_2=test_df_2[~test_df_2['Away_Team_ID'].isin([9,10,11])]
+    test_df_2=test_df_2[~test_df_2['Home_Team_ID'].isin([9,10,11])]
+
+    test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[0]).reset_index(name='slope'))
+    test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[1]).reset_index(name='coeffic'))
+
+    st.write('Listing of Regression', test_df_2.drop_duplicates(subset=['slope']))
+
     st.write('Limerick ',test_df_2[test_df_2['ID']==0])
+    st.write('Kilkenny',test_df_2[test_df_2['ID']==1])
+
 
     test_df_2['spread_with_home_adv']=test_df_2['spread']+test_df_2['home_pts_adv']
     test_df_3=test_df_2.dropna(subset=['spread'])
@@ -557,11 +576,14 @@ with st.expander('Workings for Team Totals'):
 
     st.write('team totals', updated_df.set_index(['Home Team','Away Team']))
     # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
-    # st.write('test df 3', test_df_3)
+    st.write('test df 3 before regression', use_test)
+    clean_team_totals=use_test.dropna(subset=['home_spread'])
+    st.write('after', clean_team_totals)
+    # clean_team_totals=clean_team_totals['ID']
     # test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
     test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
     test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
-    # st.write('df_3', test_df_3)
+    st.write('df_3', test_df_3)
     st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
     # st.write('regression Totals',np.polyfit(test_df_3['Spread'], test_df_3['Closing_Total'], 1))
     st.write('regression Totals',np.polyfit(test_df_3['Spread'].abs(), test_df_3['Closing_Total'], 1))
