@@ -521,14 +521,25 @@ with st.expander('Workings for Team Totals'):
 
     test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
     st.write('Be careful of the below as it throws a wierd result for Antrim ')
-    test_df_2=test_df_2[~test_df_2['Away_Team_ID'].isin([9,10,11])]
-    test_df_2=test_df_2[~test_df_2['Home_Team_ID'].isin([9,10,11])]
+    st.write('test_df_2', test_df_2)
+    df_portion_with_top_seeds=test_df_2[test_df_2['ID']<9].copy()
+    df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Away_Team_ID'].isin([9,10,11])]
+    df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Home_Team_ID'].isin([9,10,11])]
+
+
+    df_portion_with_bottom_seeds=test_df_2[test_df_2['ID']>8].copy()
+
+    test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0)
+    st.write('concat', test_df_2)
+    # test_df_2=test_df_2[~test_df_2['Away_Team_ID'].isin([9,10,11])]
+    # test_df_2=test_df_2[~test_df_2['Home_Team_ID'].isin([9,10,11])]
 
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[0]).reset_index(name='slope'))
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[1]).reset_index(name='coeffic'))
 
     st.write('Listing of Regression', test_df_2.drop_duplicates(subset=['slope']))
 
+    st.write('Dublin',test_df_2[test_df_2['ID']==8])
     st.write('Limerick ',test_df_2[test_df_2['ID']==0])
     st.write('Kilkenny',test_df_2[test_df_2['ID']==1])
 
