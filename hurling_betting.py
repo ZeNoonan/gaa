@@ -536,12 +536,19 @@ with st.expander('Workings for Team Totals'):
 
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[0]).reset_index(name='slope'))
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[1]).reset_index(name='coeffic'))
+    test_df_2['Away ID'] = test_df_2['Away_Team_ID'].fillna(0)+test_df_2['Home_Team_ID'].fillna(0) 
+    # test_df_2=test_df_2.rename(columns={'ID': 'Home ID'})
 
     st.write('Listing of Regression', test_df_2.drop_duplicates(subset=['slope']))
 
     st.write('Dublin',test_df_2[test_df_2['ID']==8])
     st.write('Limerick ',test_df_2[test_df_2['ID']==0])
     st.write('Kilkenny',test_df_2[test_df_2['ID']==1])
+
+    # to_be_merged=
+
+
+
 
 
     test_df_2['spread_with_home_adv']=test_df_2['spread']+test_df_2['home_pts_adv']
@@ -670,18 +677,18 @@ with st.expander('Workings for Team Totals'):
     filtered_negative_spread=test_df_3.loc[test_df_3['Spread']<0.1].drop(['slope','coeffic'],axis=1)
     filtered_negative_spread['quartile']=pd.qcut(filtered_negative_spread['Spread'],q=quantile_spread,labels=False)
     st.write('filtered negative spread whats wrong', filtered_negative_spread)
-    filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
-                                                            .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
-    filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
-                                                            .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
+    # filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
+    #                                                         .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    # filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
+    #                                                         .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
 
 
 
     
-    st.write(filtered_negative_spread.groupby('quartile')['Spread'].apply(list))
+    # st.write(filtered_negative_spread.groupby('quartile')['Spread'].apply(list))
 
     
-    st.write('filtered negative spread TO CHECK', filtered_negative_spread.sort_values(by='quartile'))
+    # st.write('filtered negative spread TO CHECK', filtered_negative_spread.sort_values(by='quartile'))
     
 
 
