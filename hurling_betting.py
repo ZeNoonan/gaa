@@ -489,7 +489,7 @@ with st.expander('Penalty Factor by Match Graph'):
 #         updated_df_with_momentum['Spread']<updated_df_with_momentum['Opening Spread'],1,-1))
 
 with st.expander('Workings for Team Totals'):
-    st.write('updated_df', updated_df)
+    # st.write('updated_df', updated_df)
 
     cols_to_move=['Week','Date','Home Team','Away Team','Spread','Home Points','Away Points','Home_Total_Points','Away_Total_Points','Closing_Total',]
     cols = cols_to_move + [col for col in updated_df if col not in cols_to_move]
@@ -521,7 +521,7 @@ with st.expander('Workings for Team Totals'):
 
     test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
     st.write('Be careful of the below as it throws a wierd result for Antrim ')
-    st.write('test_df_2', test_df_2)
+    # st.write('test_df_2', test_df_2)
     df_portion_with_top_seeds=test_df_2[test_df_2['ID']<9].copy()
     df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Away_Team_ID'].isin([9,10,11])]
     df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Home_Team_ID'].isin([9,10,11])]
@@ -530,7 +530,7 @@ with st.expander('Workings for Team Totals'):
     df_portion_with_bottom_seeds=test_df_2[test_df_2['ID']>8].copy()
 
     test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0)
-    st.write('concat', test_df_2)
+    # st.write('concat', test_df_2)
     # test_df_2=test_df_2[~test_df_2['Away_Team_ID'].isin([9,10,11])]
     # test_df_2=test_df_2[~test_df_2['Home_Team_ID'].isin([9,10,11])]
 
@@ -540,10 +540,25 @@ with st.expander('Workings for Team Totals'):
     # test_df_2=test_df_2.rename(columns={'ID': 'Home ID'})
 
     st.write('Listing of Regression', test_df_2.drop_duplicates(subset=['slope']))
+    regression_per_id=test_df_2.drop_duplicates(subset=['slope']).loc[:,['ID','slope','coeffic']]
+    home_regression=regression_per_id.rename(columns={'ID':'Home ID','slope':'home_slope','coeffic':'home_coeffic'})
+    away_regression=regression_per_id.rename(columns={'ID':'Away ID','slope':'away_slope','coeffic':'away_coeffic'})
+    
+    st.write('to merge listing of regression', home_regression)
 
-    st.write('Dublin',test_df_2[test_df_2['ID']==8])
-    st.write('Limerick ',test_df_2[test_df_2['ID']==0])
-    st.write('Kilkenny',test_df_2[test_df_2['ID']==1])
+    
+    merge_update_df_selected_lines=updated_df.loc[:,['Week','Date','Home ID','Away ID','Home Team','Away Team','Home Points','Away Points',
+                                                     'calculated_spread','Home_Total_Points','Away_Total_Points']]
+
+    st.write('updated df', merge_update_df_selected_lines)
+
+    check_after_merge=pd.merge(merge_update_df_selected_lines,home_regression,how='outer')
+    check_after_merge=pd.merge(check_after_merge,away_regression,how='outer').sort_values(by=['Week','Home ID'])
+    st.write('check this after merge', check_after_merge)
+
+    # st.write('Dublin',test_df_2[test_df_2['ID']==8])
+    # st.write('Limerick ',test_df_2[test_df_2['ID']==0])
+    # st.write('Kilkenny',test_df_2[test_df_2['ID']==1])
 
     # to_be_merged=
 
@@ -551,183 +566,183 @@ with st.expander('Workings for Team Totals'):
 
 
 
-    test_df_2['spread_with_home_adv']=test_df_2['spread']+test_df_2['home_pts_adv']
-    test_df_3=test_df_2.dropna(subset=['spread'])
-    # test_df_3['n'] = test_df_3.groupby('ID').cumcount() // 4
-    test_df_3['estimated_pts']=(test_df_3['Spread']*-.5218)
-    test_df_3['estimated_pts_1']=24.64
-    test_df_3['pts_spread_estimate']=test_df_3['estimated_pts_1']+test_df_3['estimated_pts']
-    # st.write('checking calc of totals', AgGrid(test_df_3))
-    pts_estimate_df=test_df_3.loc[:,['Week','Date','ID','pts_spread_estimate']]
-    # st.write('to merge into betting df', pts_estimate_df)
-    pts_spread_home=pts_estimate_df.rename(columns={'ID':'Home ID'})
-    # stdc_home['cover_sign']=-stdc_home['cover_sign']
-    pts_spread_away=pts_estimate_df.rename(columns={'ID':'Away ID'})
-    # st.write('updated df', updated_df,'cols', updated_df.columns)
-    # st.write('pts spread home', pts_spread_home,'cols', pts_spread_home.columns)
-    updated_df=updated_df.merge(pts_spread_home,on=['Date','Week','Home ID'],how='left').rename(columns={'pts_spread_estimate':'home_pts_spread_estimate'})
-    updated_df=updated_df.merge(pts_spread_away,on=['Date','Week','Away ID'],how='left').rename(columns={'pts_spread_estimate':'away_pts_spread_estimate'})
-    updated_df['total_pts']=updated_df['Home Points']+updated_df['Away Points']
-    # updated_df['total_est_pts'] = updated_df['home_pts_spread_estimate']+updated_df['away_pts_spread_estimate']
-    updated_df['total_est_pts'] = (updated_df['Spread'].abs()*0.1976)+48.6353
-    updated_df['total_pts_pick'] = np.where(updated_df['total_est_pts']>updated_df['Closing_Total'],1,-1)
-    updated_df['totals_cover'] = np.where(updated_df['total_pts']>updated_df['Closing_Total'],1,-1)
-    updated_df['totals_bet_result'] = updated_df['total_pts_pick'] * updated_df['totals_cover']
+    # test_df_2['spread_with_home_adv']=test_df_2['spread']+test_df_2['home_pts_adv']
+    # test_df_3=test_df_2.dropna(subset=['spread'])
+    # # test_df_3['n'] = test_df_3.groupby('ID').cumcount() // 4
+    # test_df_3['estimated_pts']=(test_df_3['Spread']*-.5218)
+    # test_df_3['estimated_pts_1']=24.64
+    # test_df_3['pts_spread_estimate']=test_df_3['estimated_pts_1']+test_df_3['estimated_pts']
+    # # st.write('checking calc of totals', AgGrid(test_df_3))
+    # pts_estimate_df=test_df_3.loc[:,['Week','Date','ID','pts_spread_estimate']]
+    # # st.write('to merge into betting df', pts_estimate_df)
+    # pts_spread_home=pts_estimate_df.rename(columns={'ID':'Home ID'})
+    # # stdc_home['cover_sign']=-stdc_home['cover_sign']
+    # pts_spread_away=pts_estimate_df.rename(columns={'ID':'Away ID'})
+    # # st.write('updated df', updated_df,'cols', updated_df.columns)
+    # # st.write('pts spread home', pts_spread_home,'cols', pts_spread_home.columns)
+    # updated_df=updated_df.merge(pts_spread_home,on=['Date','Week','Home ID'],how='left').rename(columns={'pts_spread_estimate':'home_pts_spread_estimate'})
+    # updated_df=updated_df.merge(pts_spread_away,on=['Date','Week','Away ID'],how='left').rename(columns={'pts_spread_estimate':'away_pts_spread_estimate'})
+    # updated_df['total_pts']=updated_df['Home Points']+updated_df['Away Points']
+    # # updated_df['total_est_pts'] = updated_df['home_pts_spread_estimate']+updated_df['away_pts_spread_estimate']
+    # updated_df['total_est_pts'] = (updated_df['Spread'].abs()*0.1976)+48.6353
+    # updated_df['total_pts_pick'] = np.where(updated_df['total_est_pts']>updated_df['Closing_Total'],1,-1)
+    # updated_df['totals_cover'] = np.where(updated_df['total_pts']>updated_df['Closing_Total'],1,-1)
+    # updated_df['totals_bet_result'] = updated_df['total_pts_pick'] * updated_df['totals_cover']
     
-    updated_df['home_pts_pick'] = np.where(updated_df['home_pts_spread_estimate']>updated_df['Home_Total_Points'],1,-1)
-    updated_df['away_pts_pick'] = np.where(updated_df['away_pts_spread_estimate']>updated_df['Away_Total_Points'],1,-1)
-    updated_df['home_pts_cover'] = np.where(updated_df['Home Points']>updated_df['Home_Total_Points'],1,-1)
-    updated_df['away_pts_cover'] = np.where(updated_df['Away Points']>updated_df['Away_Total_Points'],1,-1)
-    updated_df['home_pts_bet_result'] = updated_df['home_pts_pick'] * updated_df['home_pts_cover']
-    updated_df['away_pts_bet_result'] = updated_df['away_pts_pick'] * updated_df['away_pts_cover']
+    # updated_df['home_pts_pick'] = np.where(updated_df['home_pts_spread_estimate']>updated_df['Home_Total_Points'],1,-1)
+    # updated_df['away_pts_pick'] = np.where(updated_df['away_pts_spread_estimate']>updated_df['Away_Total_Points'],1,-1)
+    # updated_df['home_pts_cover'] = np.where(updated_df['Home Points']>updated_df['Home_Total_Points'],1,-1)
+    # updated_df['away_pts_cover'] = np.where(updated_df['Away Points']>updated_df['Away_Total_Points'],1,-1)
+    # updated_df['home_pts_bet_result'] = updated_df['home_pts_pick'] * updated_df['home_pts_cover']
+    # updated_df['away_pts_bet_result'] = updated_df['away_pts_pick'] * updated_df['away_pts_cover']
 
 
 
-    cols_to_move=['Week','Date','Home Team','Away Team','Spread','Home Points','Away Points','total_pts','Closing_Total','total_est_pts',
-                  'total_pts_pick','totals_cover','totals_bet_result',
-                  'home_pts_spread_estimate','Home_Total_Points','home_pts_pick','away_pts_spread_estimate','away_pts_pick','Away_Total_Points']
-    cols = cols_to_move + [col for col in updated_df if col not in cols_to_move]
+    # cols_to_move=['Week','Date','Home Team','Away Team','Spread','Home Points','Away Points','total_pts','Closing_Total','total_est_pts',
+    #               'total_pts_pick','totals_cover','totals_bet_result',
+    #               'home_pts_spread_estimate','Home_Total_Points','home_pts_pick','away_pts_spread_estimate','away_pts_pick','Away_Total_Points']
+    # cols = cols_to_move + [col for col in updated_df if col not in cols_to_move]
     
-    # updated_df=updated_df[cols].sort_values(by=['Date','Home ID']).dropna(subset=['Closing_Total'])
-    updated_df=updated_df[cols].sort_values(by=['Date','Home ID'])
+    # # updated_df=updated_df[cols].sort_values(by=['Date','Home ID']).dropna(subset=['Closing_Total'])
+    # updated_df=updated_df[cols].sort_values(by=['Date','Home ID'])
 
 
-    st.write('team totals', updated_df.set_index(['Home Team','Away Team']))
-    # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
-    st.write('test df 3 before regression', use_test)
-    clean_team_totals=use_test.dropna(subset=['home_spread'])
-    st.write('after', clean_team_totals)
-    # clean_team_totals=clean_team_totals['ID']
-    # test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
-    test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
-    test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
-    st.write('df_3', test_df_3)
-    st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
-    # st.write('regression Totals',np.polyfit(test_df_3['Spread'], test_df_3['Closing_Total'], 1))
-    st.write('regression Totals',np.polyfit(test_df_3['Spread'].abs(), test_df_3['Closing_Total'], 1))
+    # st.write('team totals', updated_df.set_index(['Home Team','Away Team']))
+    # # https://stackoverflow.com/questions/74031620/calculate-the-slope-for-every-n-days-per-group
+    # st.write('test df 3 before regression', use_test)
+    # clean_team_totals=use_test.dropna(subset=['home_spread'])
+    # st.write('after', clean_team_totals)
+    # # clean_team_totals=clean_team_totals['ID']
+    # # test_df_3=test_df_3.merge(test_df_3.groupby(['ID', 'n']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    # test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    # test_df_3=test_df_3.merge(test_df_3.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
+    # st.write('df_3', test_df_3)
+    # st.write('regression',np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1))
+    # # st.write('regression Totals',np.polyfit(test_df_3['Spread'], test_df_3['Closing_Total'], 1))
+    # st.write('regression Totals',np.polyfit(test_df_3['Spread'].abs(), test_df_3['Closing_Total'], 1))
 
 
 
     
-    def graph_pl(decile_df_abs_home_1,column):
-        line_cover= alt.Chart(decile_df_abs_home_1).mark_line().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
-        alt.Y(column),color=alt.Color('category'))
-        text_cover=line_cover.mark_text(baseline='middle',dx=0,dy=-15).encode(text=alt.Text(column),color=alt.value('black'))
-        overlay = pd.DataFrame({column: [0]})
-        vline = alt.Chart(overlay).mark_rule(color='black', strokeWidth=1).encode(y=column)
-        return st.altair_chart(line_cover + text_cover + vline,use_container_width=True)
+    # def graph_pl(decile_df_abs_home_1,column):
+    #     line_cover= alt.Chart(decile_df_abs_home_1).mark_line().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
+    #     alt.Y(column),color=alt.Color('category'))
+    #     text_cover=line_cover.mark_text(baseline='middle',dx=0,dy=-15).encode(text=alt.Text(column),color=alt.value('black'))
+    #     overlay = pd.DataFrame({column: [0]})
+    #     vline = alt.Chart(overlay).mark_rule(color='black', strokeWidth=1).encode(y=column)
+    #     return st.altair_chart(line_cover + text_cover + vline,use_container_width=True)
 
 
-    # weekly_results=updated_df.groupby(['Week','totals_bet_result']).agg(winning=('totals_bet_result','sum'),count=('totals_bet_result','count'))
-    weekly_results=updated_df.rename(columns={'totals_bet_result':'result'}).dropna(subset=['Closing_Total']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
-    weekly_results['total_result']=weekly_results['winning'].cumsum()
-    graph_pl_data=weekly_results.melt(id_vars='Week',var_name='category',value_name='result')
-    st.write('Totals results')
-    graph_pl(graph_pl_data,column='result')
-    
-
-    # home_pts_results=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
-    # home_pts_results['total_result']=home_pts_results['winning'].cumsum()
-    # # st.write('home weekly results', home_pts_results)
-
-    # away_pts_results=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
-    # away_pts_results['total_result']=away_pts_results['winning'].cumsum()
-    # st.write('away weekly results', away_pts_results)
-
-
-    # away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
-    # home_pts_graph=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
-    
-    away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points'])
-    home_pts_graph=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points'])
-    
-    pts_graph_result=pd.concat([away_pts_graph,home_pts_graph]).groupby(['Week']).agg(winning=('result','sum')).reset_index()
-    pts_graph_result['total_result']=pts_graph_result['winning'].cumsum()
-    st.write('Team pts_graph_result')
-    graph_pl_data=pts_graph_result.melt(id_vars='Week',var_name='category',value_name='result')
-
-
-    graph_pl(graph_pl_data,column='result')
-
-    grouped_id_working=[]
-    
-    # df = pd.DataFrame({'col1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10]})
-    # st.write('df',df)
-    # # Try to bin the data into 4 equal bins using qcut, but fail due to duplicate edges
-    # df['quartile'] = pd.qcut(df['col1'], q=4)
-    # st.write('df',df)
-
-
-    # test_df_3['quartile']=pd.qcut(test_df_3['Spread'],q=10,labels=False)
-    # st.write('test df 3', test_df_3)
-    # st.write(test_df_3.groupby('quartile')['Spread'].apply(list))
-    filtered_positive_spread=test_df_3.loc[test_df_3['Spread']>0.1].drop(['slope','coeffic'],axis=1)
-    quantile_spread=4
-    filtered_positive_spread['quartile']=pd.qcut(filtered_positive_spread['Spread'],q=quantile_spread,labels=False)
-    # st.write('filtered postive spread before', filtered_positive_spread.sort_values(by='quartile'))
-    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['quartile'])\
-                                                            .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
-    filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['quartile'])\
-                                                            .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
+    # # weekly_results=updated_df.groupby(['Week','totals_bet_result']).agg(winning=('totals_bet_result','sum'),count=('totals_bet_result','count'))
+    # weekly_results=updated_df.rename(columns={'totals_bet_result':'result'}).dropna(subset=['Closing_Total']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    # weekly_results['total_result']=weekly_results['winning'].cumsum()
+    # graph_pl_data=weekly_results.melt(id_vars='Week',var_name='category',value_name='result')
+    # st.write('Totals results')
+    # graph_pl(graph_pl_data,column='result')
     
 
-    st.write(filtered_positive_spread.groupby('quartile')['Spread'].apply(list))
-    st.write('filtered postive spread after NOT WORKING?? TO CHECK', filtered_positive_spread.sort_values(by='quartile'))
+    # # home_pts_results=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
+    # # home_pts_results['total_result']=home_pts_results['winning'].cumsum()
+    # # # st.write('home weekly results', home_pts_results)
 
-    filtered_negative_spread=test_df_3.loc[test_df_3['Spread']<0.1].drop(['slope','coeffic'],axis=1)
-    filtered_negative_spread['quartile']=pd.qcut(filtered_negative_spread['Spread'],q=quantile_spread,labels=False)
-    st.write('filtered negative spread whats wrong', filtered_negative_spread)
-    # filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
+    # # away_pts_results=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week','result']).agg(winning=('result','sum')).reset_index()
+    # # away_pts_results['total_result']=away_pts_results['winning'].cumsum()
+    # # st.write('away weekly results', away_pts_results)
+
+
+    # # away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    # # home_pts_graph=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points']).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    
+    # away_pts_graph=updated_df.rename(columns={'away_pts_bet_result':'result'}).dropna(subset=['Away_Total_Points'])
+    # home_pts_graph=updated_df.rename(columns={'home_pts_bet_result':'result'}).dropna(subset=['Home_Total_Points'])
+    
+    # pts_graph_result=pd.concat([away_pts_graph,home_pts_graph]).groupby(['Week']).agg(winning=('result','sum')).reset_index()
+    # pts_graph_result['total_result']=pts_graph_result['winning'].cumsum()
+    # st.write('Team pts_graph_result')
+    # graph_pl_data=pts_graph_result.melt(id_vars='Week',var_name='category',value_name='result')
+
+
+    # graph_pl(graph_pl_data,column='result')
+
+    # grouped_id_working=[]
+    
+    # # df = pd.DataFrame({'col1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10]})
+    # # st.write('df',df)
+    # # # Try to bin the data into 4 equal bins using qcut, but fail due to duplicate edges
+    # # df['quartile'] = pd.qcut(df['col1'], q=4)
+    # # st.write('df',df)
+
+
+    # # test_df_3['quartile']=pd.qcut(test_df_3['Spread'],q=10,labels=False)
+    # # st.write('test df 3', test_df_3)
+    # # st.write(test_df_3.groupby('quartile')['Spread'].apply(list))
+    # filtered_positive_spread=test_df_3.loc[test_df_3['Spread']>0.1].drop(['slope','coeffic'],axis=1)
+    # quantile_spread=4
+    # filtered_positive_spread['quartile']=pd.qcut(filtered_positive_spread['Spread'],q=quantile_spread,labels=False)
+    # # st.write('filtered postive spread before', filtered_positive_spread.sort_values(by='quartile'))
+    # filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['quartile'])\
     #                                                         .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
-    # filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
+    # filtered_positive_spread=filtered_positive_spread.merge(filtered_positive_spread.groupby(['quartile'])\
     #                                                         .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
+    
+
+    # st.write(filtered_positive_spread.groupby('quartile')['Spread'].apply(list))
+    # st.write('filtered postive spread after NOT WORKING?? TO CHECK', filtered_positive_spread.sort_values(by='quartile'))
+
+    # filtered_negative_spread=test_df_3.loc[test_df_3['Spread']<0.1].drop(['slope','coeffic'],axis=1)
+    # filtered_negative_spread['quartile']=pd.qcut(filtered_negative_spread['Spread'],q=quantile_spread,labels=False)
+    # st.write('filtered negative spread whats wrong', filtered_negative_spread)
+    # # filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
+    # #                                                         .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[0]).reset_index(name='slope'))
+    # # filtered_negative_spread=filtered_negative_spread.merge(filtered_negative_spread.groupby(['quartile'])\
+    # #                                                         .apply(lambda s: np.polyfit(s['Spread'], s['spread_with_home_adv'], 1)[1]).reset_index(name='coeffic'))
 
 
 
     
-    # st.write(filtered_negative_spread.groupby('quartile')['Spread'].apply(list))
+    # # st.write(filtered_negative_spread.groupby('quartile')['Spread'].apply(list))
 
     
-    # st.write('filtered negative spread TO CHECK', filtered_negative_spread.sort_values(by='quartile'))
+    # # st.write('filtered negative spread TO CHECK', filtered_negative_spread.sort_values(by='quartile'))
     
 
 
-    # for name, group in test_df_3.groupby('ID'):
-    #     pass
-        # st.write('group', group)
-        # grouped_id_working.append(group)
+    # # for name, group in test_df_3.groupby('ID'):
+    # #     pass
+    #     # st.write('group', group)
+    #     # grouped_id_working.append(group)
 
-    # df_working_group = pd.concat(grouped_id_working, ignore_index=True)
+    # # df_working_group = pd.concat(grouped_id_working, ignore_index=True)
     
-    # st.write('test spread',test_df_3['spread'],'test points',test_df_3['spread_with_home_adv'])
-    # st.write('regression seems to work',np.polyfit([-.5,-2.5,-3,-7.5], [25.5,24.5,26.5,29.5], 1))
-    # st.write('test_df_3 wont work cos its a fixed window I want a rolling 4 game window', test_df_3)
-    # groupby_object = test_df_3.groupby('ID')['Spread','spread_with_home_adv'].rolling(4, min_periods=4)
-    # groupby_object = test_df_3.groupby('ID').rolling(4, min_periods=4)
-    # groupby_object = test_df_3.groupby('ID')
-    # does_this_work = 
-    # for x,df in groupby_object:
-        # st.write('x',x)
-        # st.write('df',df)
-        # df['try_this']=np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1)
-    #     # st.write(y['Spread'].rolling(4, min_periods=4))
-    #     # def test_func(x)
-    #     # y['test 2']=np.polyfit(x['Spread'].rolling(4, min_periods=4), x['spread_with_home_adv'].rolling(4, min_periods=4), 1)
-    #     st.write(np.polyfit(y['Spread'].rolling(4, min_periods=4), y['spread_with_home_adv'].rolling(4, min_periods=4), 1))
-        # st.write('number',x, 'Per ID',y)
+    # # st.write('test spread',test_df_3['spread'],'test points',test_df_3['spread_with_home_adv'])
+    # # st.write('regression seems to work',np.polyfit([-.5,-2.5,-3,-7.5], [25.5,24.5,26.5,29.5], 1))
+    # # st.write('test_df_3 wont work cos its a fixed window I want a rolling 4 game window', test_df_3)
+    # # groupby_object = test_df_3.groupby('ID')['Spread','spread_with_home_adv'].rolling(4, min_periods=4)
+    # # groupby_object = test_df_3.groupby('ID').rolling(4, min_periods=4)
+    # # groupby_object = test_df_3.groupby('ID')
+    # # does_this_work = 
+    # # for x,df in groupby_object:
+    #     # st.write('x',x)
+    #     # st.write('df',df)
+    #     # df['try_this']=np.polyfit(test_df_3['Spread'], test_df_3['spread_with_home_adv'], 1)
+    # #     # st.write(y['Spread'].rolling(4, min_periods=4))
+    # #     # def test_func(x)
+    # #     # y['test 2']=np.polyfit(x['Spread'].rolling(4, min_periods=4), x['spread_with_home_adv'].rolling(4, min_periods=4), 1)
+    # #     st.write(np.polyfit(y['Spread'].rolling(4, min_periods=4), y['spread_with_home_adv'].rolling(4, min_periods=4), 1))
+    #     # st.write('number',x, 'Per ID',y)
     
-        # st.write('regresssion',np.polyfit(x['Spread'], x['spread_with_home_adv'], 1))
+    #     # st.write('regresssion',np.polyfit(x['Spread'], x['spread_with_home_adv'], 1))
 
-    # https://stackoverflow.com/questions/28465850/rolling-window-polynomial-fit-in-pandas
-    # my_ts = pd.Series(data = np.random.normal(size = 10 * 1), index = pd.date_range(start = '2013-01-01', periods = 10 * 1))
-    # st.write('my ts', my_ts)
-    # to_add = my_ts.rolling(4, min_periods=4).apply(lambda x: np.polyfit(range(len(x)), x, 1)[0])
-    # test_x = my_ts.rolling(4, min_periods=4).apply(lambda x: np.polyfit(range(len(x)), x, 1)[1])
-    # # st.write('coefs', my_ts)
-    # new_test=pd.concat([my_ts, to_add,test_x],axis=1)
-    # st.write(my_ts.rolling(4, min_periods=4).apply(lambda x: np.polyfit(range(len(x)), x, 3)[0]))
-    # st.write(new_test)
-    # coefs = pd.rolling_apply(my_ts, 21, lambda x: np.polyfit(range(len(x)), x, 3))
+    # # https://stackoverflow.com/questions/28465850/rolling-window-polynomial-fit-in-pandas
+    # # my_ts = pd.Series(data = np.random.normal(size = 10 * 1), index = pd.date_range(start = '2013-01-01', periods = 10 * 1))
+    # # st.write('my ts', my_ts)
+    # # to_add = my_ts.rolling(4, min_periods=4).apply(lambda x: np.polyfit(range(len(x)), x, 1)[0])
+    # # test_x = my_ts.rolling(4, min_periods=4).apply(lambda x: np.polyfit(range(len(x)), x, 1)[1])
+    # # # st.write('coefs', my_ts)
+    # # new_test=pd.concat([my_ts, to_add,test_x],axis=1)
+    # # st.write(my_ts.rolling(4, min_periods=4).apply(lambda x: np.polyfit(range(len(x)), x, 3)[0]))
+    # # st.write(new_test)
+    # # coefs = pd.rolling_apply(my_ts, 21, lambda x: np.polyfit(range(len(x)), x, 3))
 
 with placeholder_2.expander('Betting Slip Matches'):
     # AgGrid(updated_df)
@@ -736,11 +751,11 @@ with placeholder_2.expander('Betting Slip Matches'):
     updated_df=pd.merge(updated_df,penalty_extract_to_merge,on=['Week','Home Team','Away Team','Spread'],how='outer').sort_values(by=['Date','Home ID'])
     # st.write('updated df', updated_df)
     # st.write('pts estimate to merge', pts_estimate_df)
-    home_pts_estimate_df=pts_estimate_df.rename(columns={'ID':'Home ID','pts_spread_estimate':'home_pts_spread'})
-    away_pts_estimate_df=pts_estimate_df.rename(columns={'ID':'Away ID','pts_spread_estimate':'away_pts_spread'})
-    updated_df=pd.merge(updated_df,home_pts_estimate_df,on=['Week','Date','Home ID'],how='left')
+    # home_pts_estimate_df=pts_estimate_df.rename(columns={'ID':'Home ID','pts_spread_estimate':'home_pts_spread'})
+    # away_pts_estimate_df=pts_estimate_df.rename(columns={'ID':'Away ID','pts_spread_estimate':'away_pts_spread'})
+    # updated_df=pd.merge(updated_df,home_pts_estimate_df,on=['Week','Date','Home ID'],how='left')
     # st.write('#1 Merged correctly? - Looks like it', updated_df)
-    updated_df=pd.merge(updated_df,away_pts_estimate_df,on=['Week','Date','Away ID'],how='left').sort_values(by=['Date','Home ID'])
+    # updated_df=pd.merge(updated_df,away_pts_estimate_df,on=['Week','Date','Away ID'],how='left').sort_values(by=['Date','Home ID'])
     # st.write('away pts estimate to merge', away_pts_estimate_df)
     updated_df['momentum_pick']=np.where(updated_df['Spread']==updated_df['Opening Spread'],0,np.where(
     updated_df['Spread']<updated_df['Opening Spread'],1,-1))
