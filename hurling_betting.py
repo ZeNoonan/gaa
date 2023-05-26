@@ -303,7 +303,7 @@ list_power_ranking=[]
 power_df=df_power.loc[:,['Week','ID','adj_spread']].copy()
 games_df=matrix_df_1.copy()
 first=list(range(-3,(finished_week-2)))
-last=list(range(0,(finished_week+1)))
+last=list(range(0,(finished_week+1)))   
 for first,last in zip(first,last):
     first_section=games_df[games_df['Week'].between(first,last)]
     full_game_matrix=games_matrix_workings(first_section)
@@ -490,11 +490,13 @@ with st.expander('Penalty Factor by Match Graph'):
 
 with st.expander('Workings for Team Totals'):
     # st.write('updated_df', updated_df)
-
-    cols_to_move=['Week','Date','Home Team','Away Team','Spread','Home Points','Away Points','Home_Total_Points','Away_Total_Points','Closing_Total',]
+    cols_to_move=['Week','Date','Home ID','Away ID','Home Team','Away Team','Home Points','Away Points','Spread',
+                                                     'Home_Total_Points','Away_Total_Points','Closing_Total']
     cols = cols_to_move + [col for col in updated_df if col not in cols_to_move]
     updated_df=updated_df[cols].sort_values(by=['Date','Home ID'])
-    st.write('Limerick',   updated_df[  (updated_df['Home Team']=='Limerick') | (updated_df['Away Team']=='Limerick')      ] )
+    st.write('Galway',   updated_df[  (updated_df['Home Team']=='Galway') | (updated_df['Away Team']=='Galway')      ].sort_values(by=['Week']) )
+
+
 
     test_df=updated_df.copy()
 
@@ -520,7 +522,7 @@ with st.expander('Workings for Team Totals'):
     test_df_2=test_df_2.sort_values(by=['ID','Week'],ascending=True)
 
     test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
-    st.write('Be careful of the below as it throws a wierd result for Antrim ')
+    # st.write('Be careful of the below as it throws a wierd result for Antrim ')
     # st.write('test_df_2', test_df_2)
     df_portion_with_top_seeds=test_df_2[test_df_2['ID']<9].copy()
     df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Away_Team_ID'].isin([9,10,11])]
@@ -544,17 +546,26 @@ with st.expander('Workings for Team Totals'):
     home_regression=regression_per_id.rename(columns={'ID':'Home ID','slope':'home_slope','coeffic':'home_coeffic'})
     away_regression=regression_per_id.rename(columns={'ID':'Away ID','slope':'away_slope','coeffic':'away_coeffic'})
     
-    st.write('to merge listing of regression', home_regression)
+    # st.write('to merge listing of regression', home_regression)
 
     
     merge_update_df_selected_lines=updated_df.loc[:,['Week','Date','Home ID','Away ID','Home Team','Away Team','Home Points','Away Points',
-                                                     'calculated_spread','Home_Total_Points','Away_Total_Points']]
+                                                     'calculated_spread','Home_Total_Points','Away_Total_Points','Closing_Total','Spread']]
 
-    st.write('updated df', merge_update_df_selected_lines)
+    # st.write('updated df', merge_update_df_selected_lines)
 
     check_after_merge=pd.merge(merge_update_df_selected_lines,home_regression,how='outer')
     check_after_merge=pd.merge(check_after_merge,away_regression,how='outer').sort_values(by=['Week','Home ID'])
-    st.write('check this after merge', check_after_merge)
+    check_after_merge['home_est_points'] = check_after_merge['home_slope'] * check_after_merge['calculated_spread'] + check_after_merge['home_coeffic']
+    check_after_merge['away_est_points'] = check_after_merge['away_slope'] * -check_after_merge['calculated_spread'] + check_after_merge['away_coeffic']
+
+    cols_to_move=['Week','Date','Home ID','Away ID','Home Team','Away Team','Home Points','Away Points','home_est_points','away_est_points','Spread',
+                                                     'calculated_spread','Home_Total_Points','Away_Total_Points','Closing_Total']
+    cols = cols_to_move + [col for col in check_after_merge if col not in cols_to_move]
+    check_after_merge=check_after_merge[cols].sort_values(by=['Date','Home ID'])
+
+
+    st.write('Galway has a funny slope check it out', check_after_merge)
 
     # st.write('Dublin',test_df_2[test_df_2['ID']==8])
     # st.write('Limerick ',test_df_2[test_df_2['ID']==0])
