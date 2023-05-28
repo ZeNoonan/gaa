@@ -558,8 +558,8 @@ with st.expander('Workings for Team Totals'):
     check_after_merge=pd.merge(check_after_merge,away_regression,how='outer').sort_values(by=['Week','Home ID'])
     check_after_merge['home_est_points'] = check_after_merge['home_slope'] * check_after_merge['calculated_spread'] + check_after_merge['home_coeffic']
     check_after_merge['away_est_points'] = check_after_merge['away_slope'] * -check_after_merge['calculated_spread'] + check_after_merge['away_coeffic']
-
-    cols_to_move=['Week','Date','Home ID','Away ID','Home Team','Away Team','Home Points','Away Points','home_est_points','away_est_points','Spread',
+    check_after_merge['total_est_points']=check_after_merge['away_est_points'] + check_after_merge['home_est_points']
+    cols_to_move=['Week','Date','Home ID','Away ID','Home Team','Away Team','Home Points','Away Points','home_est_points','away_est_points','total_est_points','Spread',
                                                      'calculated_spread','Home_Total_Points','Away_Total_Points','Closing_Total']
     cols = cols_to_move + [col for col in check_after_merge if col not in cols_to_move]
     check_after_merge=check_after_merge[cols].sort_values(by=['Date','Home ID'])
