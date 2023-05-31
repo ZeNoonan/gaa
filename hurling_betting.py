@@ -523,11 +523,11 @@ with st.expander('Workings for Team Totals'):
 
     test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
     # st.write('Be careful of the below as it throws a wierd result for Antrim ')
-    # st.write('test_df_2', test_df_2)
+    st.write('test_df_2 before i start investigating and appling the function', test_df_2)
     df_portion_with_top_seeds=test_df_2[test_df_2['ID']<9].copy()
     df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Away_Team_ID'].isin([9,10,11])]
     df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Home_Team_ID'].isin([9,10,11])]
-
+    # so basically im splitting the teams up as the bottom 3 are bad and are skewing the regression
 
     df_portion_with_bottom_seeds=test_df_2[test_df_2['ID']>8].copy()
 
@@ -538,7 +538,12 @@ with st.expander('Workings for Team Totals'):
 
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[0]).reset_index(name='slope'))
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['spread'], 1)[1]).reset_index(name='coeffic'))
+    
     test_df_2['Away ID'] = test_df_2['Away_Team_ID'].fillna(0)+test_df_2['Home_Team_ID'].fillna(0) 
+    
+    
+    
+    
     # test_df_2=test_df_2.rename(columns={'ID': 'Home ID'})
 
     st.write('Listing of Regression', test_df_2.drop_duplicates(subset=['slope']))
