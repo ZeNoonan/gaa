@@ -205,6 +205,8 @@ spread_3=season_cover_3(spread_2,'cover_sign','cover')
 matrix_df=spread_workings(data)
 # st.write('line 203', matrix_df)
 matrix_df=matrix_df.reset_index().rename(columns={'index':'unique_match_id'})
+team_total_master_data=matrix_df.copy()
+# st.write('base data', team_total_master_data)
 test_df = matrix_df.copy()
 # st.write('line 205', test_df)
 matrix_df['at_home'] = 1
@@ -488,6 +490,34 @@ with st.expander('Penalty Factor by Match Graph'):
 #     updated_df_with_momentum['momentum_pick']=np.where(updated_df_with_momentum['Spread']==updated_df_with_momentum['Opening Spread'],0,np.where(
 #         updated_df_with_momentum['Spread']<updated_df_with_momentum['Opening Spread'],1,-1))
 
+with st.expander('Team Totals Cleaned UP and automated for every week'):
+    # st.write('need to bring in the calculated spread')
+    # st.write('updated df where is home_pts_adv', updated_df)
+    pre_season=team_total_master_data[team_total_master_data['Week']<1].copy()
+    # st.write('pre-season', pre_season)
+    team_total_master_data=pd.concat([team_total_master_data,pre_season],ignore_index=True)
+    # st.write('concat work ok??',team_total_master_data.sort_values(by='Week'))
+    team_total_master_data['at_home'] = 1
+    team_total_master_data['at_away'] = -1
+    team_total_master_data['away_spread']=team_total_master_data['Away_Total_Points']
+    team_total_master_data['home_spread']=team_total_master_data['Home_Total_Points']
+
+    team_total_master_data['Away Spread'] = - team_total_master_data['Spread']
+    team_total_master_data=team_total_master_data.rename(columns={'Spread':'Home Spread'})
+
+    test_df_home=team_total_master_data.loc[:,['Week','Date','Home ID','at_home','home_spread','Home Spread','Closing_Total','Away ID']]\
+    .rename(columns={'Away ID':'Away_Team_ID','Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'spread',}).copy()
+
+    test_df_away=team_total_master_data.loc[:,['Week','Date','Away ID','at_away','away_spread','Away Spread','Closing_Total','Home ID']]\
+        .rename(columns={'Home ID':'Home_Team_ID','Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'spread',}).copy()
+    
+    # # st.write('test home 253', test_df_home, 'away', test_df_away)
+    # test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True)
+    # test_df_2=test_df_2.sort_values(by=['ID','Week'],ascending=True)
+
+    # test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
+    # st.write(team_total_master_data)
+
 with st.expander('Workings for Team Totals'):
     # st.write('updated_df', updated_df)
     cols_to_move=['Week','Date','Home ID','Away ID','Home Team','Away Team','Home Points','Away Points','Spread',
@@ -499,6 +529,7 @@ with st.expander('Workings for Team Totals'):
 
 
     test_df=updated_df.copy()
+    # st.write('uppdated df', updated_df)
 
     test_df['at_home'] = 1
     test_df['at_away'] = -1
