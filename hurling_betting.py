@@ -16,6 +16,7 @@ placeholder_1=st.empty()
 placeholder_2=st.empty()
 
 finished_week=8
+week_regression_current=11
 last_week=2 # what is this for?? its for graphing i think
 number_of_teams=12
 min_factor=2
@@ -504,13 +505,39 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
 
     team_total_master_data['Away Spread'] = - team_total_master_data['Spread']
     team_total_master_data=team_total_master_data.rename(columns={'Spread':'Home Spread'})
-
+    st.write('master data', team_total_master_data)
     test_df_home=team_total_master_data.loc[:,['Week','Date','Home ID','at_home','home_spread','Home Spread','Closing_Total','Away ID']]\
-    .rename(columns={'Away ID':'Away_Team_ID','Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'spread',}).copy()
+    .rename(columns={'Away ID':'Away_Team_ID','Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'team_total_points',}).copy()
 
     test_df_away=team_total_master_data.loc[:,['Week','Date','Away ID','at_away','away_spread','Away Spread','Closing_Total','Home ID']]\
-        .rename(columns={'Home ID':'Home_Team_ID','Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'spread',}).copy()
+        .rename(columns={'Home ID':'Home_Team_ID','Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'team_total_points',}).copy()
     
+
+    test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True).sort_values(by=['ID','Week'],ascending=True)
+
+    test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
+
+    df_portion_with_top_seeds=test_df_2[test_df_2['ID']<9].copy()
+    df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Away_Team_ID'].isin([9,10,11])]
+    df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Home_Team_ID'].isin([9,10,11])]
+    # so basically im splitting the teams up as the bottom 3 are bad and are skewing the regression
+    df_portion_with_bottom_seeds=test_df_2[test_df_2['ID']>8].copy()
+    test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0)
+
+    # could try the for loop in here with week and the results to a list
+    for x in range(1,week_regression_current+1):
+        pass
+
+    test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]).reset_index(name='slope')) 
+    # above adds the slope
+    st.write('listing of slope', test_df_2)
+    st.write('group by ', test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
+    test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[1]).reset_index(name='coeffic'))
+    # above adds the coefficient
+    st.write('test_df 2 after', test_df_2)
+    test_df_2['Away ID'] = test_df_2['Away_Team_ID'].fillna(0)+test_df_2['Home_Team_ID'].fillna(0) 
+
+
     # # st.write('test home 253', test_df_home, 'away', test_df_away)
     # test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True)
     # test_df_2=test_df_2.sort_values(by=['ID','Week'],ascending=True)
@@ -601,7 +628,7 @@ with st.expander('Workings for Team Totals'):
     check_after_merge=check_after_merge[cols].sort_values(by=['Date','Home ID'])
 
 
-    st.write('Galway has a funny slope check it out', check_after_merge)
+    st.write('Galway has a funny slope check it out', check_after_merge.set_index(['Week','Home Team','Away Team']))
 
     # st.write('Dublin',test_df_2[test_df_2['ID']==8])
     # st.write('Limerick ',test_df_2[test_df_2['ID']==0])
