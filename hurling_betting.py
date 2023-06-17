@@ -524,17 +524,26 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     df_portion_with_bottom_seeds=test_df_2[test_df_2['ID']>8].copy()
     test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0)
 
+    # before the regression
+    st.write('test_df 2 before regression', test_df_2)
     # could try the for loop in here with week and the results to a list
-    for x in range(1,week_regression_current+1):
-        pass
-
+    list_regression_results=[]
+    for x in range(4,week_regression_current+1):
+        y=test_df_2[test_df_2['Week']<x]
+        # list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
+        list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
+    df_regression_list = pd.concat(list_regression_results).reset_index()
+    # df_regression_list = pd.concat(list_regression_results, ignore_index=True)
+    st.write('results', df_regression_list)
+    st.write('results', list_regression_results)
+    
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]).reset_index(name='slope')) 
     # above adds the slope
     st.write('listing of slope', test_df_2)
     st.write('group by ', test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[1]).reset_index(name='coeffic'))
     # above adds the coefficient
-    st.write('test_df 2 after', test_df_2)
+    # st.write('test_df 2 after', test_df_2)
     test_df_2['Away ID'] = test_df_2['Away_Team_ID'].fillna(0)+test_df_2['Home_Team_ID'].fillna(0) 
 
 
