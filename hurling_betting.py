@@ -531,12 +531,18 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     for x in range(4,week_regression_current+1):
         y=test_df_2[test_df_2['Week']<x]
         # list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
-        list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
-    df_regression_list = pd.concat(list_regression_results).reset_index()
+        list_regression_results.append(y.groupby(['ID','Week']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
+    df_regression_list = pd.concat(list_regression_results).reset_index().rename(columns={0:'slope_coeff'})
     # df_regression_list = pd.concat(list_regression_results, ignore_index=True)
-    st.write('results', df_regression_list)
-    st.write('results', list_regression_results)
-    
+    st.write('results 1', df_regression_list)
+
+
+
+
+    st.write('results 2', pd.concat([df_regression_list.drop('slope_coeff', axis=1),
+                df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1)) # got this from chatgpt
+    # st.write('up',pd.concat([pd.DataFrame(df_regression_list['slope_coeff'].values.tolist()), df[1]], axis=1))
+
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]).reset_index(name='slope')) 
     # above adds the slope
     st.write('listing of slope', test_df_2)
