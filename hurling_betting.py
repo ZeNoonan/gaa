@@ -16,7 +16,7 @@ placeholder_1=st.empty()
 placeholder_2=st.empty()
 
 finished_week=8
-week_regression_current=11
+
 last_week=2 # what is this for?? its for graphing i think
 number_of_teams=12
 min_factor=2
@@ -527,26 +527,30 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # before the regression
     st.write('test_df 2 before regression', test_df_2)
     # could try the for loop in here with week and the results to a list
+    week_regression_current=11
     list_regression_results=[]
-    for x in range(4,week_regression_current+1):
+    for x in range(1,week_regression_current+1):
         y=test_df_2[test_df_2['Week']<x]
         # list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
         list_regression_results.append(y.groupby(['ID','Week']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
     df_regression_list = pd.concat(list_regression_results).reset_index().rename(columns={0:'slope_coeff'})
-    # df_regression_list = pd.concat(list_regression_results, ignore_index=True)
-    st.write('results 1', df_regression_list)
+    regression_results_week_id = pd.concat([df_regression_list.drop('slope_coeff', axis=1),
+                df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1).drop_duplicates() # got this from chatgpt
+    
+    st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID','Week']))
+    st.write('the co-efficient doesnt look right when compared to the other box it has 24/25 but this has 14........')
 
 
 
 
-    st.write('results 2', pd.concat([df_regression_list.drop('slope_coeff', axis=1),
-                df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1)) # got this from chatgpt
+    # st.write('results 2', pd.concat([df_regression_list.drop('slope_coeff', axis=1),
+    #             df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1)) # got this from chatgpt
     # st.write('up',pd.concat([pd.DataFrame(df_regression_list['slope_coeff'].values.tolist()), df[1]], axis=1))
 
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]).reset_index(name='slope')) 
     # above adds the slope
-    st.write('listing of slope', test_df_2)
-    st.write('group by ', test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
+    # st.write('listing of slope', test_df_2)
+    # st.write('group by ', test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
     test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[1]).reset_index(name='coeffic'))
     # above adds the coefficient
     # st.write('test_df 2 after', test_df_2)
