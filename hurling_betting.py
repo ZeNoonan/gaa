@@ -23,6 +23,7 @@ min_factor=2
 
 
 
+
 # @st.cache
 def read_data(file):
     return pd.read_excel(file)
@@ -522,22 +523,26 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Home_Team_ID'].isin([9,10,11])]
     # so basically im splitting the teams up as the bottom 3 are bad and are skewing the regression
     df_portion_with_bottom_seeds=test_df_2[test_df_2['ID']>8].copy()
-    test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0)
+    test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0).sort_values(by=['ID','Week','Date']).reset_index(drop=True)
 
     # before the regression
     st.write('test_df 2 before regression', test_df_2)
     # could try the for loop in here with week and the results to a list
-    week_regression_current=11
+    week_regression_current=8
     list_regression_results=[]
-    for x in range(1,week_regression_current+1):
+    for x in range(7,week_regression_current+1):
+        st.write('x', x)
         y=test_df_2[test_df_2['Week']<x]
-        # list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
-        list_regression_results.append(y.groupby(['ID','Week']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
+        list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
+        # list_regression_results.append(y['Week'])
+        # list_regression_results.append(y.groupby(['ID','Week']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1))) # doesnt work
     df_regression_list = pd.concat(list_regression_results).reset_index().rename(columns={0:'slope_coeff'})
+    # df_regression_list = pd.concat(list_regression_results)
     regression_results_week_id = pd.concat([df_regression_list.drop('slope_coeff', axis=1),
                 df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1).drop_duplicates() # got this from chatgpt
     
-    st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID','Week']))
+    # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID','Week']))
+    st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID']))
     st.write('the co-efficient doesnt look right when compared to the other box it has 24/25 but this has 14........')
 
 
