@@ -526,24 +526,31 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0).sort_values(by=['ID','Week','Date']).reset_index(drop=True)
 
     # before the regression
-    st.write('test_df 2 before regression', test_df_2)
+    # st.write('test_df 2 before regression', test_df_2)
     # could try the for loop in here with week and the results to a list
-    week_regression_current=8
+    week_regression_current=11
     list_regression_results=[]
-    for x in range(7,week_regression_current+1):
-        st.write('x', x)
+    for x in range(2,week_regression_current+1):
+        # st.write('x', x)
         y=test_df_2[test_df_2['Week']<x]
-        list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
-        # list_regression_results.append(y['Week'])
-        # list_regression_results.append(y.groupby(['ID','Week']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1))) # doesnt work
-    df_regression_list = pd.concat(list_regression_results).reset_index().rename(columns={0:'slope_coeff'})
-    # df_regression_list = pd.concat(list_regression_results)
-    regression_results_week_id = pd.concat([df_regression_list.drop('slope_coeff', axis=1),
-                df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1).drop_duplicates() # got this from chatgpt
-    
+        week_results=y[y['Week']==(x-1)]
+        polyfit_results = y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)).reset_index().rename(columns={0:'slope_coeff'})
+        polyfit_results = pd.concat([polyfit_results.drop('slope_coeff', axis=1),
+                polyfit_results['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1).drop_duplicates() # got this from chatgpt
+        combined_df=pd.concat([week_results, polyfit_results],axis=0)
+        combined_df=pd.merge(week_results, polyfit_results, how='left', on='ID')
+        # st.write('combined df', combined_df)
+        list_regression_results.append(combined_df)
+        # list_regression_results.append(y.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)))
+    # df_regression_list = pd.concat(list_regression_results).reset_index().rename(columns={0:'slope_coeff'})
+    # regression_results_week_id = pd.concat([df_regression_list.drop('slope_coeff', axis=1),
+    #             df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1).drop_duplicates() # got this from chatgpt
+    df_regression_list = pd.concat(list_regression_results).reset_index()
+    st.write('output of list from function', df_regression_list)
+    # st.write('conversion', df_regression_list)
     # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID','Week']))
-    st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID']))
-    st.write('the co-efficient doesnt look right when compared to the other box it has 24/25 but this has 14........')
+    # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID']))
+    # st.write('the co-efficient doesnt look right when compared to the other box it has 24/25 but this has 14........')
 
 
 
