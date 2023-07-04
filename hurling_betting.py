@@ -545,7 +545,9 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # df_regression_list = pd.concat(list_regression_results).reset_index().rename(columns={0:'slope_coeff'})
     # regression_results_week_id = pd.concat([df_regression_list.drop('slope_coeff', axis=1),
     #             df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1).drop_duplicates() # got this from chatgpt
-    df_regression_list = pd.concat(list_regression_results).reset_index()
+    df_regression_list = pd.concat(list_regression_results).reset_index().drop(columns=['index'])
+    st.write('before ID change', df_regression_list)
+    df_regression_list['Away ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
     st.write('output of list from function', df_regression_list)
     # st.write('conversion', df_regression_list)
     # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID','Week']))
@@ -559,14 +561,14 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     #             df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1)) # got this from chatgpt
     # st.write('up',pd.concat([pd.DataFrame(df_regression_list['slope_coeff'].values.tolist()), df[1]], axis=1))
 
-    test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]).reset_index(name='slope')) 
+    # test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]).reset_index(name='slope')) 
     # above adds the slope
     # st.write('listing of slope', test_df_2)
     # st.write('group by ', test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[0]))
-    test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[1]).reset_index(name='coeffic'))
+    # test_df_2=test_df_2.merge(test_df_2.groupby(['ID']).apply(lambda s: np.polyfit(s['Spread'], s['team_total_points'], 1)[1]).reset_index(name='coeffic'))
     # above adds the coefficient
     # st.write('test_df 2 after', test_df_2)
-    test_df_2['Away ID'] = test_df_2['Away_Team_ID'].fillna(0)+test_df_2['Home_Team_ID'].fillna(0) 
+    # test_df_2['Away ID'] = test_df_2['Away_Team_ID'].fillna(0)+test_df_2['Home_Team_ID'].fillna(0) 
 
 
     # # st.write('test home 253', test_df_home, 'away', test_df_away)
