@@ -343,7 +343,7 @@ updated_df['spread_working']=updated_df['home_power']-updated_df['away_power']+u
 updated_df['power_pick'] = np.where(updated_df['spread_working'] > 0, 1,
 np.where(updated_df['spread_working'] < 0,-1,0))
 # updated_df_1=updated_df.copy()
-# st.write(updated_df)
+st.write('is this what i need to bring in as the master i need the spread power rank',updated_df)
 
 
 
@@ -497,7 +497,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.write('updated df where is home_pts_adv', updated_df)
     pre_season=team_total_master_data[team_total_master_data['Week']<1].copy()
     # st.write('pre-season', pre_season)
-    team_total_master_data=pd.concat([team_total_master_data,pre_season],ignore_index=True)
+    team_total_master_data=pd.concat([team_total_master_data,pre_season],ignore_index=True).drop('Week',axis=1).rename(columns={'week_regression':'Week'})
     # st.write('concat work ok??',team_total_master_data.sort_values(by='Week'))
     team_total_master_data['at_home'] = 1
     team_total_master_data['at_away'] = -1
@@ -505,8 +505,8 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     team_total_master_data['home_spread']=team_total_master_data['Home_Total_Points']
 
     team_total_master_data['Away Spread'] = - team_total_master_data['Spread']
-    team_total_master_data=team_total_master_data.rename(columns={'Spread':'Home Spread'})
-    st.write('master data', team_total_master_data)
+    team_total_master_data=team_total_master_data.rename(columns={'Spread':'Home Spread'}).sort_values(by=['Week','unique_match_id'])
+    # st.write('master data Limercik', team_total_master_data[(team_total_master_data['Home Team']=='Limerick') |  (team_total_master_data['Away Team']=='Limerick') ]   )
     test_df_home=team_total_master_data.loc[:,['Week','Date','Home ID','at_home','home_spread','Home Spread','Closing_Total','Away ID']]\
     .rename(columns={'Away ID':'Away_Team_ID','Home ID':'ID','Home Spread':'Spread','at_home':'home','home_spread':'team_total_points',}).copy()
 
@@ -526,9 +526,9 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0).sort_values(by=['ID','Week','Date']).reset_index(drop=True)
 
     # before the regression
-    # st.write('test_df 2 before regression', test_df_2)
+    # st.write('test_df 2 before regression, is Spread ok check Limerick out', test_df_2)
     # could try the for loop in here with week and the results to a list
-    week_regression_current=11
+    week_regression_current=13
     list_regression_results=[]
     for x in range(2,week_regression_current+1):
         # st.write('x', x)
@@ -546,9 +546,9 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # regression_results_week_id = pd.concat([df_regression_list.drop('slope_coeff', axis=1),
     #             df_regression_list['slope_coeff'].apply(lambda x: pd.Series(x))], axis=1).drop_duplicates() # got this from chatgpt
     df_regression_list = pd.concat(list_regression_results).reset_index().drop(columns=['index'])
-    st.write('before ID change', df_regression_list)
-    df_regression_list['Away ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
-    st.write('output of list from function', df_regression_list)
+    # st.write('before ID change', df_regression_list)
+    df_regression_list['Other Team ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
+    st.write('output of list from function after updating for ID change', df_regression_list.sort_values(by=['ID','Week'],ascending=[True,True]))
     # st.write('conversion', df_regression_list)
     # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID','Week']))
     # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID']))
