@@ -343,7 +343,8 @@ updated_df['spread_working']=updated_df['home_power']-updated_df['away_power']+u
 updated_df['power_pick'] = np.where(updated_df['spread_working'] > 0, 1,
 np.where(updated_df['spread_working'] < 0,-1,0))
 # updated_df_1=updated_df.copy()
-st.write('is this what i need to bring in as the master i need the spread power rank',updated_df)
+team_total_data=updated_df.copy()
+# st.write('is this what i need to bring in as the master i need the spread power rank',updated_df)
 
 
 
@@ -549,6 +550,9 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.write('before ID change', df_regression_list)
     df_regression_list['Other Team ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
     st.write('output of list from function after updating for ID change', df_regression_list.sort_values(by=['ID','Week'],ascending=[True,True]))
+    st.write('i need to calculate the season to date cover on total points and team total points versus actual')
+    st.write('i need the calculated spread')
+    # st.write('want to merge this file into above', team_total_data)
     # st.write('conversion', df_regression_list)
     # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID','Week']))
     # st.write('weekly regression results', regression_results_week_id.sort_values(by=['ID']))
