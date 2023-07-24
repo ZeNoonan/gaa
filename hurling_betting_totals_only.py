@@ -223,14 +223,15 @@ def season_cover_2_total(season_cover_df,column_name):
 
 spread=spread_workings(data)
 spread=spread_workings_total(data)
-st.write('this is the data to work with for spread workings is TOTAL in here', data)
+# st.write('this is the data to work with for spread workings is TOTAL in here', spread)
 # with st.beta_expander('Season to date Cover'):
 spread_1 = season_cover_workings(spread,'home_cover','away_cover','cover',0)
-spread_1 = season_cover_workings_total(spread_1,'home_cover_total','away_cover_total','cover_total',0)
+# st.write('data', spread_1)
+spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
 spread_2=season_cover_2(spread_1,'cover')
-spread_2=season_cover_2(spread_2,'cover_total')
+spread_2_total=season_cover_2(spread_1_total,'cover_total')
 spread_3=season_cover_3(spread_2,'cover_sign','cover')
-spread_3=season_cover_3(spread_3,'cover_sign_total','cover_total')
+spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
 
 matrix_df=spread_workings(data)
 # st.write('line 203', matrix_df)
@@ -380,17 +381,38 @@ with st.expander('Season to Date Cover Factor by Team'):
     st.write('Positive number means the number of games to date that you have covered the spread; in other words teams with a positive number have beaten expectations')
     st.write('Negative number means the number of games to date that you have not covered the spread; in other words teams with a negative number have performed below expectations')
     st.write('blanks in graph are where the team got a bye week')
-    st.write('spread 3', spread_3)
-    stdc_home=spread_3.rename(columns={'ID':'Home ID'})
-    stdc_home['cover_sign']=-stdc_home['cover_sign']
-    stdc_away=spread_3.rename(columns={'ID':'Away ID'})
+    # st.write('spread 3', spread_3)
+
+    def season(spread_3,updated_df):
+        stdc_home=spread_3.rename(columns={'ID':'Home ID'})
+        stdc_home['cover_sign']=-stdc_home['cover_sign']
+        stdc_away=spread_3.rename(columns={'ID':'Away ID'})
+        # st.write('updated df', updated_df)
+        updated_df=updated_df.drop(['away_cover'],axis=1)
+        updated_df=updated_df.rename(columns={'home_cover':'home_cover_result'})
+        # st.write('line 352 before merge', updated_df)
+        updated_df=updated_df.merge(stdc_home,on=['Date','Week','Home ID'],how='left').rename(columns={'cover':'home_cover','cover_sign':'home_cover_sign'})
+        # st.write('line 354 after merge', updated_df)
+        updated_df=pd.merge(updated_df,stdc_away,on=['Date','Week','Away ID'],how='left').rename(columns={'cover':'away_cover','cover_sign':'away_cover_sign'})
+        return updated_df
+    
+    def season_total(spread_3,updated_df):
+        stdc_home=spread_3.rename(columns={'ID':'Home ID'})
+        # stdc_home['cover_sign']=-stdc_home['cover_sign']
+        stdc_away=spread_3.rename(columns={'ID':'Away ID'})
+        # st.write('updated df', updated_df)
+        updated_df=updated_df.drop(['away_cover_total'],axis=1)
+        updated_df=updated_df.rename(columns={'home_cover_total':'home_cover_result'})
+        # st.write('line 352 before merge', updated_df)
+        updated_df=updated_df.merge(stdc_home,on=['Date','Week','Home ID'],how='left').rename(columns={'cover':'home_cover','cover_sign':'home_cover_sign'})
+        # st.write('line 354 after merge', updated_df)
+        updated_df=pd.merge(updated_df,stdc_away,on=['Date','Week','Away ID'],how='left').rename(columns={'cover':'away_cover','cover_sign':'away_cover_sign'})
+        return updated_df
+
+    updated_df=season(spread_3,updated_df)
+    # updated_df=season(spread_3_total,updated_df)
     st.write('updated df', updated_df)
-    updated_df=updated_df.drop(['away_cover'],axis=1)
-    updated_df=updated_df.rename(columns={'home_cover':'home_cover_result'})
-    # st.write('line 352 before merge', updated_df)
-    updated_df=updated_df.merge(stdc_home,on=['Date','Week','Home ID'],how='left').rename(columns={'cover':'home_cover','cover_sign':'home_cover_sign'})
-    # st.write('line 354 after merge', updated_df)
-    updated_df=pd.merge(updated_df,stdc_away,on=['Date','Week','Away ID'],how='left').rename(columns={'cover':'away_cover','cover_sign':'away_cover_sign'})
+    # st.write('updated df', updated_df)
     updated_df_1=updated_df.copy()
     
     stdc_df=pd.merge(spread_3,team_names_id,on='ID').rename(columns={'Home Team':'Team'})
