@@ -226,12 +226,15 @@ spread=spread_workings_total(data)
 # st.write('this is the data to work with for spread workings is TOTAL in here', spread)
 # with st.beta_expander('Season to date Cover'):
 spread_1 = season_cover_workings(spread,'home_cover','away_cover','cover',0)
+st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
 # st.write('data', spread_1)
 spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
+st.write('check limerick total cover in here', spread_1_total)
 spread_2=season_cover_2(spread_1,'cover')
 spread_2_total=season_cover_2(spread_1_total,'cover_total')
 spread_3=season_cover_3(spread_2,'cover_sign','cover')
 spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
+st.write('check Limericks total cover in here', spread_3_total.sort_values(by=['ID','Week']))
 
 matrix_df=spread_workings(data)
 # st.write('line 203', matrix_df)
@@ -402,31 +405,46 @@ with st.expander('Season to Date Cover Factor by Team'):
         stdc_away=spread_3.rename(columns={'ID':'Away ID'})
         # st.write('updated df', updated_df)
         updated_df=updated_df.drop(['away_cover_total'],axis=1)
-        updated_df=updated_df.rename(columns={'home_cover_total':'home_cover_result'})
+        updated_df=updated_df.rename(columns={'home_cover_total':'home_cover_result_total'})
         # st.write('line 352 before merge', updated_df)
-        updated_df=updated_df.merge(stdc_home,on=['Date','Week','Home ID'],how='left').rename(columns={'cover':'home_cover','cover_sign':'home_cover_sign'})
+        updated_df=updated_df.merge(stdc_home,on=['Date','Week','Home ID'],how='left').rename(columns={'cover_total':'home_cover_total',
+                                                                                                       'cover_sign_total':'home_cover_sign_total'})
         # st.write('line 354 after merge', updated_df)
-        updated_df=pd.merge(updated_df,stdc_away,on=['Date','Week','Away ID'],how='left').rename(columns={'cover':'away_cover','cover_sign':'away_cover_sign'})
+        updated_df=pd.merge(updated_df,stdc_away,on=['Date','Week','Away ID'],how='left').rename(columns={'cover_total':'away_cover_total',
+                                                                                                          'cover_sign_total':'away_cover_sign_total'})
         return updated_df
 
     updated_df=season(spread_3,updated_df)
-    # updated_df=season(spread_3_total,updated_df)
-    st.write('updated df', updated_df)
+    updated_df_total=season_total(spread_3_total,updated_df)
+    # st.write('updated df total', updated_df_total)
     # st.write('updated df', updated_df)
     updated_df_1=updated_df.copy()
     
-    stdc_df=pd.merge(spread_3,team_names_id,on='ID').rename(columns={'Home Team':'Team'})
-    stdc_df=stdc_df.loc[:,['Week','Team','cover']].copy()
-    stdc_df['average']=stdc_df.groupby('Team')['cover'].transform(np.mean)
+    def run_stdc(spread_3,team_names_id,col_selection='cover'):
+        stdc_df=pd.merge(spread_3,team_names_id,on='ID').rename(columns={'Home Team':'Team'})
+        stdc_df=stdc_df.loc[:,['Week','Team',col_selection]].copy()
+        stdc_df['average']=stdc_df.groupby('Team')[col_selection].transform(np.mean)
+        return stdc_df
+    
+    stdc_df=run_stdc(spread_3,team_names_id,col_selection='cover')
+    stdc_df_total=run_stdc(spread_3_total,team_names_id,col_selection='cover_total')
+
+    st.write('spread cover', stdc_df)
+    st.write('total cover', stdc_df_total)
     # st.write(stdc_df.sort_values(by=['Team','Week']))
-    stdc_pivot=pd.pivot_table(stdc_df,index='Team', columns='Week')
-    stdc_pivot.columns = stdc_pivot.columns.droplevel(0)
-    chart_cover= alt.Chart(stdc_df).mark_rect().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
-    alt.Y('Team',sort=alt.SortField(field='average', order='descending')),color=alt.Color('cover:Q',scale=alt.Scale(scheme='redyellowgreen')))
-    # https://altair-viz.github.io/gallery/layered_heatmap_text.html
-    # https://vega.github.io/vega/docs/schemes/
-    text_cover=chart_cover.mark_text().encode(text=alt.Text('cover:N'),color=alt.value('black'))
-    st.altair_chart(chart_cover + text_cover,use_container_width=True)
+
+    def graph_cover(stdc_df,selection_colour='cover:Q',text_selection='cover:N'):
+        stdc_pivot=pd.pivot_table(stdc_df,index='Team', columns='Week')
+        stdc_pivot.columns = stdc_pivot.columns.droplevel(0)
+        chart_cover= alt.Chart(stdc_df).mark_rect().encode(alt.X('Week:O',axis=alt.Axis(title='Week',labelAngle=0)),
+        alt.Y('Team',sort=alt.SortField(field='average', order='descending')),color=alt.Color(selection_colour,scale=alt.Scale(scheme='redyellowgreen')))
+        # https://altair-viz.github.io/gallery/layered_heatmap_text.html
+        # https://vega.github.io/vega/docs/schemes/
+        text_cover=chart_cover.mark_text().encode(text=alt.Text(text_selection),color=alt.value('black'))
+        return st.altair_chart(chart_cover + text_cover,use_container_width=True)
+
+    graph_cover(stdc_df,selection_colour='cover:Q',text_selection='cover:N')
+    graph_cover(stdc_df_total,selection_colour='cover_total:Q',text_selection='cover_total:N')
 
 with st.expander('Turnover Factor by Match Graph'):
     st.write('-1 means you received more turnovers than other team, 1 means you gave up more turnovers to other team')
