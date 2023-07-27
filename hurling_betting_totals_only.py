@@ -71,7 +71,7 @@ team_names_id_2=team_names_id.rename(columns={'Home Team':'Away Team'})
 
 data=pd.merge(fb_ref_2020,team_names_id_2,on='Away Team').rename(columns={'ID':'Away ID','Home Score':'Home Points',
 'Away Score':'Away Points','Home Line Close':'Spread'})
-cols_to_move=['Week','Date','Home ID','Home Team','Away ID','Away Team','Spread']
+cols_to_move=['Week','Date','Home ID','Home Team','Away ID','Away Team','Spread','Home Points', 'Away Points', 'Home_Total_Points', 'Away_Total_Points']
 cols = cols_to_move + [col for col in data if col not in cols_to_move]
 data=data[cols]
 
@@ -229,12 +229,12 @@ spread_1 = season_cover_workings(spread,'home_cover','away_cover','cover',0)
 st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
 # st.write('data', spread_1)
 spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
-st.write('check limerick total cover in here', spread_1_total)
+st.write('check limerick total cover in here #1', spread_1_total.sort_values(by=['ID','Week','Date']))
 spread_2=season_cover_2(spread_1,'cover')
 spread_2_total=season_cover_2(spread_1_total,'cover_total')
 spread_3=season_cover_3(spread_2,'cover_sign','cover')
 spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
-st.write('check Limericks total cover in here', spread_3_total.sort_values(by=['ID','Week']))
+st.write('check Limericks total cover in here #3', spread_3_total.sort_values(by=['ID','Week']))
 
 matrix_df=spread_workings(data)
 # st.write('line 203', matrix_df)
