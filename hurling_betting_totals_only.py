@@ -71,7 +71,7 @@ team_names_id_2=team_names_id.rename(columns={'Home Team':'Away Team'})
 
 data=pd.merge(fb_ref_2020,team_names_id_2,on='Away Team').rename(columns={'ID':'Away ID','Home Score':'Home Points',
 'Away Score':'Away Points','Home Line Close':'Spread'})
-cols_to_move=['Week','Date','Home ID','Home Team','Away ID','Away Team','Spread','Home Points', 'Away Points', 'Home_Total_Points', 'Away_Total_Points']
+cols_to_move=['Week','Date','Home ID','Away ID','Home Team','Away Team','Spread','Home Points', 'Away Points','Closing_Total', 'Home_Total_Points', 'Away_Total_Points']
 cols = cols_to_move + [col for col in data if col not in cols_to_move]
 data=data[cols]
 
@@ -96,6 +96,22 @@ def spread_workings_total(data):
     np.where(((data['Home Points']+ data['Away Points']) < data['Closing_Total']),-1,0)))
     data['home_cover_total']=data['home_cover_total'].astype(int)
     data['away_cover_total'] = data['home_cover_total']
+    # data['Date']=pd.to_datetime(data['Date'])
+    # data=data.rename(columns={'Net Turnover':'home_turnover'})
+    # data['away_turnover'] = -data['home_turnover']
+    return data
+
+def spread_workings_total_team(data):
+    # data['home_win']=data['Home Points'] - data['Away Points']
+    # data['home_win'] = np.where((data['Home Points'] > data['Away Points']), 1, np.where((data['Home Points'] < data['Away Points']),-1,0))
+    data['home_cover_total_team']=(np.where(((data['Home Points'] ) > data['Home_Total_Points']), 1,
+    np.where(((data['Home Points']) < data['Home_Total_Points']),-1,0)))
+    data['home_cover_total_team']=data['home_cover_total_team'].astype(int)
+    
+    data['away_cover_total_team']=(np.where(((data['Away Points'] ) > data['Away_Total_Points']), 1,
+    np.where(((data['Away Points']) < data['Away_Total_Points']),-1,0)))
+    data['away_cover_total_team']=data['away_cover_total_team'].astype(int)
+    # data['away_cover'] = -data['home_cover']
     # data['Date']=pd.to_datetime(data['Date'])
     # data=data.rename(columns={'Net Turnover':'home_turnover'})
     # data['away_turnover'] = -data['home_turnover']
@@ -222,19 +238,25 @@ def season_cover_2_total(season_cover_df,column_name):
     return season_cover_df
 
 spread=spread_workings(data)
-spread=spread_workings_total(data)
+spread=spread_workings_total(spread)
+spread=spread_workings_total_team(spread)
 # st.write('this is the data to work with for spread workings is TOTAL in here', spread)
 # with st.beta_expander('Season to date Cover'):
 spread_1 = season_cover_workings(spread,'home_cover','away_cover','cover',0)
-st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
-# st.write('data', spread_1)
+spread_1_total_team = season_cover_workings(spread,'home_cover_total_team','away_cover_total_team','cover_total_team',0)
+st.write('is this working', spread_1_total_team)
+# st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
+st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']))
 spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
 st.write('check limerick total cover in here #1', spread_1_total.sort_values(by=['ID','Week','Date']))
 spread_2=season_cover_2(spread_1,'cover')
+spread_2_total_team=season_cover_2(spread_1_total_team,'cover_total_team')
 spread_2_total=season_cover_2(spread_1_total,'cover_total')
 spread_3=season_cover_3(spread_2,'cover_sign','cover')
+spread_3_total_team=season_cover_3(spread_2_total_team,'cover_sign_total_team','cover_total_team')
 spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
-st.write('check Limericks total cover in here #3', spread_3_total.sort_values(by=['ID','Week']))
+st.write('check Kilkenny team cover in here #3 not working', spread_3_total_team.sort_values(by=['ID','Week']))
+
 
 matrix_df=spread_workings(data)
 # st.write('line 203', matrix_df)
@@ -401,21 +423,30 @@ with st.expander('Season to Date Cover Factor by Team'):
     
     def season_total(spread_3,updated_df):
         stdc_home=spread_3.rename(columns={'ID':'Home ID'})
-        # stdc_home['cover_sign']=-stdc_home['cover_sign']
         stdc_away=spread_3.rename(columns={'ID':'Away ID'})
-        # st.write('updated df', updated_df)
         updated_df=updated_df.drop(['away_cover_total'],axis=1)
         updated_df=updated_df.rename(columns={'home_cover_total':'home_cover_result_total'})
-        # st.write('line 352 before merge', updated_df)
         updated_df=updated_df.merge(stdc_home,on=['Date','Week','Home ID'],how='left').rename(columns={'cover_total':'home_cover_total',
                                                                                                        'cover_sign_total':'home_cover_sign_total'})
-        # st.write('line 354 after merge', updated_df)
         updated_df=pd.merge(updated_df,stdc_away,on=['Date','Week','Away ID'],how='left').rename(columns={'cover_total':'away_cover_total',
                                                                                                           'cover_sign_total':'away_cover_sign_total'})
         return updated_df
 
+    def season_total_team(spread_3,updated_df):
+        stdc_home=spread_3.rename(columns={'ID':'Home ID'})
+        stdc_away=spread_3.rename(columns={'ID':'Away ID'})
+        updated_df=updated_df.drop(['away_cover_total_team'],axis=1)
+        updated_df=updated_df.rename(columns={'home_cover_total_team':'home_cover_result_total_team'})
+        updated_df=updated_df.merge(stdc_home,on=['Date','Week','Home ID'],how='left').rename(columns={'cover_total_team':'home_cover_total_team',
+                                                                                                       'cover_sign_total_team':'home_cover_sign_total_team'})
+        updated_df=pd.merge(updated_df,stdc_away,on=['Date','Week','Away ID'],how='left').rename(columns={'cover_total_team':'away_cover_total_team',
+                                                                                                          'cover_sign_total_team':'away_cover_sign_total_team'})
+        return updated_df    
+
     updated_df=season(spread_3,updated_df)
     updated_df_total=season_total(spread_3_total,updated_df)
+    updated_df_total_team=season_total_team(spread_3_total_team,updated_df)
+    st.write('Kilkenny team total is wrong on graph should be a -1 and it is a +1')
     # st.write('updated df total', updated_df_total)
     # st.write('updated df', updated_df)
     updated_df_1=updated_df.copy()
@@ -428,9 +459,12 @@ with st.expander('Season to Date Cover Factor by Team'):
     
     stdc_df=run_stdc(spread_3,team_names_id,col_selection='cover')
     stdc_df_total=run_stdc(spread_3_total,team_names_id,col_selection='cover_total')
+    stdc_df_total_team=run_stdc(spread_3_total_team,team_names_id,col_selection='cover_total_team')
+    st.write('check the input for kilkenny not working here', spread_3_total_team.sort_values(by=['ID','Week']))
 
-    st.write('spread cover', stdc_df)
+    # st.write('spread cover', stdc_df)
     st.write('total cover', stdc_df_total)
+    st.write('total cover for team', stdc_df_total_team)
     # st.write(stdc_df.sort_values(by=['Team','Week']))
 
     def graph_cover(stdc_df,selection_colour='cover:Q',text_selection='cover:N'):
@@ -445,6 +479,7 @@ with st.expander('Season to Date Cover Factor by Team'):
 
     graph_cover(stdc_df,selection_colour='cover:Q',text_selection='cover:N')
     graph_cover(stdc_df_total,selection_colour='cover_total:Q',text_selection='cover_total:N')
+    graph_cover(stdc_df_total_team,selection_colour='cover_total_team:Q',text_selection='cover_total_team:N')
 
 with st.expander('Turnover Factor by Match Graph'):
     st.write('-1 means you received more turnovers than other team, 1 means you gave up more turnovers to other team')
