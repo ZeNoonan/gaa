@@ -244,18 +244,18 @@ spread=spread_workings_total_team(spread)
 # with st.beta_expander('Season to date Cover'):
 spread_1 = season_cover_workings(spread,'home_cover','away_cover','cover',0)
 spread_1_total_team = season_cover_workings(spread,'home_cover_total_team','away_cover_total_team','cover_total_team',0)
-st.write('is this working', spread_1_total_team)
+# st.write('is this working. Answer for Kilkenny Yes', spread_1_total_team.sort_values(by=['ID','Week']))
 # st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
-st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']))
+# st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']))
 spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
-st.write('check limerick total cover in here #1', spread_1_total.sort_values(by=['ID','Week','Date']))
+# st.write('check Kilkenny total cover LOOKS WIERD INVESTIGATE', spread_1_total.sort_values(by=['ID','Week','Date']))
 spread_2=season_cover_2(spread_1,'cover')
 spread_2_total_team=season_cover_2(spread_1_total_team,'cover_total_team')
 spread_2_total=season_cover_2(spread_1_total,'cover_total')
 spread_3=season_cover_3(spread_2,'cover_sign','cover')
 spread_3_total_team=season_cover_3(spread_2_total_team,'cover_sign_total_team','cover_total_team')
 spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
-st.write('check Kilkenny team cover in here #3 not working', spread_3_total_team.sort_values(by=['ID','Week']))
+# st.write('check Kilkenny team cover in here YES its working', spread_3_total_team.sort_values(by=['ID','Week']))
 
 
 matrix_df=spread_workings(data)
@@ -443,10 +443,13 @@ with st.expander('Season to Date Cover Factor by Team'):
                                                                                                           'cover_sign_total_team':'away_cover_sign_total_team'})
         return updated_df    
 
-    updated_df=season(spread_3,updated_df)
-    updated_df_total=season_total(spread_3_total,updated_df)
-    updated_df_total_team=season_total_team(spread_3_total_team,updated_df)
-    st.write('Kilkenny team total is wrong on graph should be a -1 and it is a +1')
+    updated_df_1=season(spread_3,updated_df)
+    # st.write('Updated Df Master to be used to compare against', updated_df)
+    updated_df_total=season_total(spread_3_total,updated_df_1)
+    # st.write('does it work ok after using the different function on it', updated_df_total)
+    updated_df=season_total_team(spread_3_total_team,updated_df_total)
+    # st.write('does this work after function', updated_df_total_team)
+    # st.write('Kilkenny team total is wrong on graph should be a -1 and it is a +1')
     # st.write('updated df total', updated_df_total)
     # st.write('updated df', updated_df)
     updated_df_1=updated_df.copy()
@@ -460,11 +463,11 @@ with st.expander('Season to Date Cover Factor by Team'):
     stdc_df=run_stdc(spread_3,team_names_id,col_selection='cover')
     stdc_df_total=run_stdc(spread_3_total,team_names_id,col_selection='cover_total')
     stdc_df_total_team=run_stdc(spread_3_total_team,team_names_id,col_selection='cover_total_team')
-    st.write('check the input for kilkenny not working here', spread_3_total_team.sort_values(by=['ID','Week']))
+    # st.write('check the input for kilkenny not working here', spread_3_total_team.sort_values(by=['ID','Week']))
 
     # st.write('spread cover', stdc_df)
-    st.write('total cover', stdc_df_total)
-    st.write('total cover for team', stdc_df_total_team)
+    # st.write('total cover', stdc_df_total)
+    # st.write('total cover for team', stdc_df_total_team)
     # st.write(stdc_df.sort_values(by=['Team','Week']))
 
     def graph_cover(stdc_df,selection_colour='cover:Q',text_selection='cover:N'):
@@ -477,8 +480,11 @@ with st.expander('Season to Date Cover Factor by Team'):
         text_cover=chart_cover.mark_text().encode(text=alt.Text(text_selection),color=alt.value('black'))
         return st.altair_chart(chart_cover + text_cover,use_container_width=True)
 
+    st.write('Below is Season to Date Cover on Spread')
     graph_cover(stdc_df,selection_colour='cover:Q',text_selection='cover:N')
+    st.write('Below is Season to Date Cover on Totals')
     graph_cover(stdc_df_total,selection_colour='cover_total:Q',text_selection='cover_total:N')
+    st.write('Below is Season to Date Cover on Team Totals')
     graph_cover(stdc_df_total_team,selection_colour='cover_total_team:Q',text_selection='cover_total_team:N')
 
 with st.expander('Turnover Factor by Match Graph'):
@@ -519,7 +525,7 @@ with st.expander('Turnover Factor by Match Graph'):
 
     st.write('code below here has the updated df which feeds into the Betting Slip Tab')
     st.write('updated df_1 is just a copy of updated_df')
-    st.write('line 407 before function', updated_df)
+    # st.write('line 407 before function', updated_df)
     updated_df = turnover_data_prep_2(turnover_matches, updated_df)
     # st.write('line 409 after function', updated_df)
     updated_df_intercept = turnover_data_prep_2(intercept_matches, updated_df_1)
@@ -994,6 +1000,7 @@ with placeholder_2.expander('Betting Slip Matches'):
         betting_matches['total_factor']=betting_matches['home_turnover_sign']+betting_matches['away_turnover_sign']+betting_matches['home_cover_sign']+\
         betting_matches['away_cover_sign']+betting_matches['power_pick']+updated_df['momentum_pick']
 
+        betting_matches['over_under_factor']=betting_matches['home_cover_sign_total']+betting_matches['away_cover_sign_total']+betting_matches['home_cover_sign_total_team']+betting_matches['away_cover_sign_total_team']
         # # below is using the intercept as well
         # betting_matches['total_factor']=betting_matches['home_turnover_sign']+betting_matches['away_turnover_sign']+betting_matches['home_cover_sign']+\
         # betting_matches['away_cover_sign']+betting_matches['power_pick']+betting_matches['home_intercept_sign']+betting_matches['away_intercept_sign']
@@ -1006,9 +1013,16 @@ with placeholder_2.expander('Betting Slip Matches'):
         # betting_matches['away_cover_sign']+betting_matches['power_pick']+betting_matches['home_intercept_sign']+betting_matches['away_intercept_sign']+\
         # betting_matches['home_penalty_sign']+betting_matches['away_penalty_sign']+betting_matches['home_sin_bin_sign']+betting_matches['away_sin_bin_sign']
 
-        betting_matches['bet_on'] = np.where(betting_matches['total_factor']>min_factor,betting_matches['Home Team'],np.where(betting_matches['total_factor']<-min_factor,
-        betting_matches['Away Team'],''))
+        betting_matches['bet_on'] = np.where(betting_matches['total_factor']>min_factor,betting_matches['Home Team'],
+                                             np.where(betting_matches['total_factor']<-min_factor,betting_matches['Away Team'],''))
+        
+        betting_matches['bet_on_totals'] = np.where(betting_matches['over_under_factor']>min_factor,betting_matches['Home Team'],
+                                             np.where(betting_matches['total_factor']<-min_factor,betting_matches['Away Team'],''))
+
         betting_matches['bet_sign'] = (np.where(betting_matches['total_factor']>min_factor,1,np.where(betting_matches['total_factor']<-min_factor,-1,0)))
+        betting_matches['bet_sign_totals'] = (np.where(betting_matches['over_under_factor']>min_factor,1,
+                                                       np.where(betting_matches['over_under_factor']<-min_factor,-1,0)))
+        
         betting_matches['bet_sign'] = betting_matches['bet_sign'].astype(float)
         betting_matches['home_cover'] = betting_matches['home_cover'].astype(float)
         betting_matches['result']=betting_matches['home_cover_result'] * betting_matches['bet_sign']
