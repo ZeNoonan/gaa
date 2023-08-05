@@ -246,7 +246,7 @@ spread_1 = season_cover_workings(spread,'home_cover','away_cover','cover',0)
 spread_1_total_team = season_cover_workings(spread,'home_cover_total_team','away_cover_total_team','cover_total_team',0)
 # st.write('is this working. Answer for Kilkenny Yes', spread_1_total_team.sort_values(by=['ID','Week']))
 # st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
-# st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']))
+st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']))
 spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
 # st.write('check Kilkenny total cover LOOKS WIERD INVESTIGATE', spread_1_total.sort_values(by=['ID','Week','Date']))
 spread_2=season_cover_2(spread_1,'cover')
@@ -1000,7 +1000,8 @@ with placeholder_2.expander('Betting Slip Matches'):
         betting_matches['total_factor']=betting_matches['home_turnover_sign']+betting_matches['away_turnover_sign']+betting_matches['home_cover_sign']+\
         betting_matches['away_cover_sign']+betting_matches['power_pick']+updated_df['momentum_pick']
 
-        betting_matches['over_under_factor']=betting_matches['home_cover_sign_total']+betting_matches['away_cover_sign_total']+betting_matches['home_cover_sign_total_team']+betting_matches['away_cover_sign_total_team']
+        betting_matches['over_under_factor']=betting_matches['home_cover_sign_total']+betting_matches['away_cover_sign_total']\
+            +betting_matches['home_cover_sign_total_team']+betting_matches['away_cover_sign_total_team']
         # # below is using the intercept as well
         # betting_matches['total_factor']=betting_matches['home_turnover_sign']+betting_matches['away_turnover_sign']+betting_matches['home_cover_sign']+\
         # betting_matches['away_cover_sign']+betting_matches['power_pick']+betting_matches['home_intercept_sign']+betting_matches['away_intercept_sign']
@@ -1017,7 +1018,7 @@ with placeholder_2.expander('Betting Slip Matches'):
                                              np.where(betting_matches['total_factor']<-min_factor,betting_matches['Away Team'],''))
         
         betting_matches['bet_on_totals'] = np.where(betting_matches['over_under_factor']>min_factor,betting_matches['Home Team'],
-                                             np.where(betting_matches['total_factor']<-min_factor,betting_matches['Away Team'],''))
+                                             np.where(betting_matches['over_under_factor']<-min_factor,betting_matches['Away Team'],''))
 
         betting_matches['bet_sign'] = (np.where(betting_matches['total_factor']>min_factor,1,np.where(betting_matches['total_factor']<-min_factor,-1,0)))
         betting_matches['bet_sign_totals'] = (np.where(betting_matches['over_under_factor']>min_factor,1,
@@ -1031,7 +1032,14 @@ with placeholder_2.expander('Betting Slip Matches'):
         betting_matches['bet_sign_all'] = (np.where(betting_matches['total_factor']>0,1,np.where(betting_matches['total_factor']<-0,-1,0)))
         betting_matches['result_all']=betting_matches['home_cover_result'] * betting_matches['bet_sign_all']
         # st.write('testing sum of betting all result',betting_matches['result_all'].sum())
-        cols_to_move=['Week','Date','Home Team','Away Team','total_factor','bet_on','result','Spread','Home Points','Away Points','home_power','away_power']
+        # cols_to_move=['Week','Date','Home Team','Away Team','total_factor','bet_on','result','Spread','Home Points','Away Points',
+        #               'home_cover_sign_total',
+        #               'away_cover_sign_total','home_cover_sign_total_team','home_power','away_cover_sign_total_team','away_power']
+
+
+        cols_to_move=['Week','Date','Home Team','Away Team','over_under_factor','bet_on_totals','Home Points','Away Points',
+                      'home_cover_sign_total',
+                      'away_cover_sign_total','home_cover_sign_total_team','away_cover_sign_total_team',]
         cols = cols_to_move + [col for col in betting_matches if col not in cols_to_move]
         betting_matches=betting_matches[cols]
         betting_matches=betting_matches.sort_values(['Week','Date'],ascending=[True,True])
