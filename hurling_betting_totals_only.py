@@ -21,7 +21,7 @@ last_week=2 # what is this for?? its for graphing i think
 number_of_teams=12
 min_factor=2
 
-
+st.write('row 445 check to add in inverse for team total')
 
 
 # @st.cache
@@ -95,7 +95,7 @@ def spread_workings_total(data):
     data['home_cover_total']=(np.where(((data['Home Points'] + data['Away Points']) > data['Closing_Total']), 1,
     np.where(((data['Home Points']+ data['Away Points']) < data['Closing_Total']),-1,0)))
     data['home_cover_total']=data['home_cover_total'].astype(int)
-    data['away_cover_total'] = data['home_cover_total']
+    data['away_cover_total'] = data['home_cover_total'] # THIS IS RIGHT I THINK AS HOME AND AWAY ARE SAME
     # data['Date']=pd.to_datetime(data['Date'])
     # data=data.rename(columns={'Net Turnover':'home_turnover'})
     # data['away_turnover'] = -data['home_turnover']
@@ -107,10 +107,11 @@ def spread_workings_total_team(data):
     data['home_cover_total_team']=(np.where(((data['Home Points'] ) > data['Home_Total_Points']), 1,
     np.where(((data['Home Points']) < data['Home_Total_Points']),-1,0)))
     data['home_cover_total_team']=data['home_cover_total_team'].astype(int)
-    
+    # data['away_cover_total_team'] = -data['home_cover_total_team'] DO I NEED THIS??? SO CONFUSED NOW
     data['away_cover_total_team']=(np.where(((data['Away Points'] ) > data['Away_Total_Points']), 1,
     np.where(((data['Away Points']) < data['Away_Total_Points']),-1,0)))
     data['away_cover_total_team']=data['away_cover_total_team'].astype(int)
+
     # data['away_cover'] = -data['home_cover']
     # data['Date']=pd.to_datetime(data['Date'])
     # data=data.rename(columns={'Net Turnover':'home_turnover'})
@@ -246,7 +247,7 @@ spread_1 = season_cover_workings(spread,'home_cover','away_cover','cover',0)
 spread_1_total_team = season_cover_workings(spread,'home_cover_total_team','away_cover_total_team','cover_total_team',0)
 # st.write('is this working. Answer for Kilkenny Yes', spread_1_total_team.sort_values(by=['ID','Week']))
 # st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
-st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']))
+st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']).set_index('Week'))
 spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
 # st.write('check Kilkenny total cover LOOKS WIERD INVESTIGATE', spread_1_total.sort_values(by=['ID','Week','Date']))
 spread_2=season_cover_2(spread_1,'cover')
@@ -256,7 +257,8 @@ spread_3=season_cover_3(spread_2,'cover_sign','cover')
 spread_3_total_team=season_cover_3(spread_2_total_team,'cover_sign_total_team','cover_total_team')
 spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
 # st.write('check Kilkenny team cover in here YES its working', spread_3_total_team.sort_values(by=['ID','Week']))
-
+st.write('check Kilkenny total cover in here ', spread_3_total.sort_values(by=['ID','Week']).set_index('Week'))
+st.write('this is kilkeeny spread cover in here',spread_3.sort_values(by=['ID','Week']).set_index('Week'))
 
 matrix_df=spread_workings(data)
 # st.write('line 203', matrix_df)
@@ -410,7 +412,9 @@ with st.expander('Season to Date Cover Factor by Team'):
 
     def season(spread_3,updated_df):
         stdc_home=spread_3.rename(columns={'ID':'Home ID'})
+
         stdc_home['cover_sign']=-stdc_home['cover_sign']
+
         stdc_away=spread_3.rename(columns={'ID':'Away ID'})
         # st.write('updated df', updated_df)
         updated_df=updated_df.drop(['away_cover'],axis=1)
@@ -423,6 +427,9 @@ with st.expander('Season to Date Cover Factor by Team'):
     
     def season_total(spread_3,updated_df):
         stdc_home=spread_3.rename(columns={'ID':'Home ID'})
+
+        stdc_home['cover_sign_total']=-stdc_home['cover_sign_total']
+        
         stdc_away=spread_3.rename(columns={'ID':'Away ID'})
         updated_df=updated_df.drop(['away_cover_total'],axis=1)
         updated_df=updated_df.rename(columns={'home_cover_total':'home_cover_result_total'})
@@ -434,6 +441,10 @@ with st.expander('Season to Date Cover Factor by Team'):
 
     def season_total_team(spread_3,updated_df):
         stdc_home=spread_3.rename(columns={'ID':'Home ID'})
+
+        # add in here?
+
+
         stdc_away=spread_3.rename(columns={'ID':'Away ID'})
         updated_df=updated_df.drop(['away_cover_total_team'],axis=1)
         updated_df=updated_df.rename(columns={'home_cover_total_team':'home_cover_result_total_team'})
@@ -1038,8 +1049,8 @@ with placeholder_2.expander('Betting Slip Matches'):
 
 
         cols_to_move=['Week','Date','Home Team','Away Team','over_under_factor','bet_on_totals','Home Points','Away Points',
-                      'home_cover_sign_total',
-                      'away_cover_sign_total','home_cover_sign_total_team','away_cover_sign_total_team',]
+                      'home_cover_total','home_cover_sign_total','away_cover_total','away_cover_sign_total','home_cover_sign_total_team','away_cover_sign_total_team',
+                      'home_cover','home_cover_sign','away_cover','away_cover_sign']
         cols = cols_to_move + [col for col in betting_matches if col not in cols_to_move]
         betting_matches=betting_matches[cols]
         betting_matches=betting_matches.sort_values(['Week','Date'],ascending=[True,True])
