@@ -673,13 +673,22 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.write('before ID change', df_regression_list)
     df_regression_list['Other Team ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
     df_regression_list['Other Team ID']=df_regression_list['Other Team ID'].astype(int)
+    # st.write('regression list',df_regression_list)
     # st.write(df_regression_list['Other Team ID'].dtype)
+    # st.write(team_names_id.dtypes)
+    # st.write(team_names_id.columns)
+    # st.write(team_names_id)
+    team_names_id_3=team_names_id.rename(columns={'ID':'Other Team ID'})
+    df_regression_list=pd.merge(df_regression_list,team_names_id_3,on='Other Team ID',how='outer').rename(columns={'Home Team':'Opponent'})
     st.write('output of list from function after updating for ID change', df_regression_list.sort_values(by=['ID','Week'],ascending=[True,True]))
+    # st.write('team names id', team_names_id)
+    
+
     st.write('i need to calculate the season to date cover on total points and team total points versus actual')
     st.write('i need the calculated spread')
     st.write('Graph this out to sense check')
-    limerick_graph=df_regression_list.loc[df_regression_list['ID'].isin([0]),['Spread','team_total_points']].reset_index(drop=True)
-    # limerick_graph['Spread']=limerick_graph['Spread']
+    limerick_graph=df_regression_list.loc[df_regression_list['ID'].isin([0]),['Spread','team_total_points','Opponent','Date']].reset_index(drop=True)
+    # limerick_graph['Spread']=limerick_graph['Spread']s
     st.write('graph workings', limerick_graph, 'Dtype', limerick_graph.dtypes)
 
 
@@ -687,8 +696,8 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # degree_list = [1, 3]
     degree_list = [1]
 
-    base = alt.Chart(limerick_graph).mark_circle(color="black").encode(alt.X("Spread:Q",axis=alt.Axis(title='Spread', tickMinStep=0.5)),
-            alt.Y("team_total_points:Q",axis=alt.Axis(title='Team Total Points', tickMinStep=0.5),scale=alt.Scale(domain=(24,30))))
+    base = alt.Chart(limerick_graph).mark_circle(color="red").encode(alt.X("Spread:Q",axis=alt.Axis(title='Spread', tickMinStep=0.5)),
+            alt.Y("team_total_points:Q",axis=alt.Axis(title='Team Total Points', tickMinStep=0.5),scale=alt.Scale(domain=(23.5,30.5))))
     # base = alt.Chart(limerick_graph).mark_circle(color="black").encode(alt.X("Spread:Q"), alt.Y("team_total_points:Q").scale(domain=(20.0,30.0)))
     # https://stackoverflow.com/questions/56064697/set-tickminstep-for-altair-axis
     polynomial_fit = [base.transform_regression("Spread", "team_total_points", method="poly", order=order, as_=["Spread", str(order)])
@@ -696,19 +705,20 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     .transform_fold([str(order)], as_=["degree", "team_total_points"])
     .encode(alt.Color("degree:N"))
     for order in degree_list]
-
+    text = base.mark_text(align='left',baseline='middle',dx=7).encode(text='Opponent')
     # text = base.mark_text(align='left',baseline='middle',dx=7).encode(text='label')
     # https://altair-viz.github.io/gallery/scatter_with_labels.html
 
-    st.altair_chart(alt.layer(base, *polynomial_fit),use_container_width=True)
+    st.altair_chart(alt.layer(base+text, *polynomial_fit),use_container_width=True)
     
     # points = alt.Chart(limerick_graph).mark_point().encode(alt.X("Spread:Q"), alt.Y("team_total_points:Q").scale(domain=(24.5,29.5)))
     points = alt.Chart(limerick_graph).mark_point().encode(alt.X("Spread:Q"), alt.Y("team_total_points:Q",scale=alt.Scale(domain=(24,30))))
-    # text = points.mark_text(align='left',baseline='middle',dx=7).encode(text='label')
+    text = points.mark_text(align='left',baseline='middle',dx=7).encode(text='Opponent')
     # label put other team name
     # https://altair-viz.github.io/gallery/scatter_with_labels.html
 
-    st.altair_chart((points),use_container_width=True)
+    # st.altair_chart((points),use_container_width=True)
+    # st.altair_chart((points+text),use_container_width=True)
 
     source = pd.DataFrame({
     'x': [1, 3, 5, 7, 9],
@@ -722,7 +732,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     baseline='middle',
     dx=7).encode(text='label')
 
-    st.altair_chart(points + text)
+    # st.altair_chart(points + text)
 
     # st.write('Was just curious if there was some home away effect but looks fairly even in terms of turnovers to points')
     # st.altair_chart(alt.Chart(limerick_graph).mark_circle(color="black").encode(alt.X("Spread"), alt.Y("team_total_points")),use_container_width=True)
