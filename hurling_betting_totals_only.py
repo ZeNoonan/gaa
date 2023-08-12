@@ -2,8 +2,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from io import BytesIO
-# import os
-import base64 
+from textwrap import wrap
 import altair as alt
 import datetime as dt
 # from st_aggrid import AgGrid
@@ -652,7 +651,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # before the regression
     # st.write('test_df 2 before regression, is Spread ok check Limerick out', test_df_2)
     # could try the for loop in here with week and the results to a list
-    week_regression_current=13
+    week_regression_current=14
     list_regression_results=[]
     for x in range(2,week_regression_current+1):
         # st.write('x', x)
@@ -680,6 +679,9 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.write(team_names_id)
     team_names_id_3=team_names_id.rename(columns={'ID':'Other Team ID'})
     df_regression_list=pd.merge(df_regression_list,team_names_id_3,on='Other Team ID',how='outer').rename(columns={'Home Team':'Opponent'})
+    df_regression_list['date_string']=df_regression_list['Date'].dt.strftime('%d-%b')
+    df_regression_list['opp_date']=df_regression_list['date_string'] + " " + df_regression_list['Opponent']
+
     st.write('output of list from function after updating for ID change', df_regression_list.sort_values(by=['ID','Week'],ascending=[True,True]))
     # st.write('team names id', team_names_id)
     
@@ -687,10 +689,22 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     st.write('i need to calculate the season to date cover on total points and team total points versus actual')
     st.write('i need the calculated spread')
     st.write('Graph this out to sense check')
-    limerick_graph=df_regression_list.loc[df_regression_list['ID'].isin([0]),['Spread','team_total_points','Opponent','Date']].reset_index(drop=True)
-    # limerick_graph['Spread']=limerick_graph['Spread']s
-    st.write('graph workings', limerick_graph, 'Dtype', limerick_graph.dtypes)
+    limerick_graph=df_regression_list.loc[df_regression_list['ID'].isin([0]),['Spread','team_total_points','opp_date']].reset_index(drop=True)
+    # https://stackoverflow.com/questions/71583780/how-to-avoid-overlapping-of-labels-in-scatter-plot
+    # https://stackoverflow.com/questions/71215156/how-to-wrap-axis-label-in-altair
+    limerick_graph = limerick_graph.groupby(['Spread','team_total_points'])['opp_date'].apply(list).reset_index() 
+    # limerick_graph['label'] = limerick_graph['opp_date'].apply(wrap, args=[30])
 
+    st.write('can I add in a did they cover the team total??')
+    st.write('graph workings', limerick_graph)
+    # st.write('test',limerick_graph.groupby(['Spread','team_total_points'])['opp_date'].apply(list).reset_index())
+
+    df = pd.DataFrame({
+    'label': ['Really long label here that will be truncated', 'Short label'],
+    'value': [4, 5]})
+    st.altair_chart(alt.Chart(df).mark_bar().encode(x='value',y='label'),use_container_width=True)
+    df['label'] = df['label'].apply(wrap, args=[30])
+    st.altair_chart(alt.Chart(df).mark_bar().encode(x='value',y=alt.Y('label', axis=alt.Axis(labelFontSize=9))),use_container_width=True)
 
     # degree_list = [1, 3, 5]
     # degree_list = [1, 3]
@@ -705,7 +719,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     .transform_fold([str(order)], as_=["degree", "team_total_points"])
     .encode(alt.Color("degree:N"))
     for order in degree_list]
-    text = base.mark_text(align='left',baseline='middle',dx=7).encode(text='Opponent')
+    text = base.mark_text(align='left',baseline='middle',dx=17,dy=-7).encode(text='opp_date')
     # text = base.mark_text(align='left',baseline='middle',dx=7).encode(text='label')
     # https://altair-viz.github.io/gallery/scatter_with_labels.html
 
