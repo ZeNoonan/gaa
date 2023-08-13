@@ -651,7 +651,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # before the regression
     # st.write('test_df 2 before regression, is Spread ok check Limerick out', test_df_2)
     # could try the for loop in here with week and the results to a list
-    week_regression_current=14
+    week_regression_current=13
     list_regression_results=[]
     for x in range(2,week_regression_current+1):
         # st.write('x', x)
@@ -672,6 +672,14 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.write('before ID change', df_regression_list)
     df_regression_list['Other Team ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
     df_regression_list['Other Team ID']=df_regression_list['Other Team ID'].astype(int)
+
+    # https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
+    seq = [0, 1, 2, 3, 4, 5]
+    window_size = 3
+
+    for i in range(len(seq) - window_size + 1):
+        st.write(seq[i: i + window_size])
+
     # st.write('regression list',df_regression_list)
     # st.write(df_regression_list['Other Team ID'].dtype)
     # st.write(team_names_id.dtypes)
@@ -692,6 +700,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     limerick_graph=df_regression_list.loc[df_regression_list['ID'].isin([0]),['Spread','team_total_points','opp_date']].reset_index(drop=True)
     # https://stackoverflow.com/questions/71583780/how-to-avoid-overlapping-of-labels-in-scatter-plot
     # https://stackoverflow.com/questions/71215156/how-to-wrap-axis-label-in-altair
+    # st.write(limerick_graph
     limerick_graph = limerick_graph.groupby(['Spread','team_total_points'])['opp_date'].apply(list).reset_index() 
     # limerick_graph['label'] = limerick_graph['opp_date'].apply(wrap, args=[30])
 
@@ -699,12 +708,12 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     st.write('graph workings', limerick_graph)
     # st.write('test',limerick_graph.groupby(['Spread','team_total_points'])['opp_date'].apply(list).reset_index())
 
-    df = pd.DataFrame({
-    'label': ['Really long label here that will be truncated', 'Short label'],
-    'value': [4, 5]})
-    st.altair_chart(alt.Chart(df).mark_bar().encode(x='value',y='label'),use_container_width=True)
-    df['label'] = df['label'].apply(wrap, args=[30])
-    st.altair_chart(alt.Chart(df).mark_bar().encode(x='value',y=alt.Y('label', axis=alt.Axis(labelFontSize=9))),use_container_width=True)
+    # df = pd.DataFrame({
+    # 'label': ['Really long label here that will be truncated', 'Short label'],
+    # 'value': [4, 5]})
+    # # st.altair_chart(alt.Chart(df).mark_bar().encode(x='value',y='label'),use_container_width=True)
+    # df['label'] = df['label'].apply(wrap, args=[30])
+    # st.altair_chart(alt.Chart(df).mark_bar().encode(x='value',y=alt.Y('label', axis=alt.Axis(labelFontSize=9))),use_container_width=True)
 
     # degree_list = [1, 3, 5]
     # degree_list = [1, 3]
@@ -734,17 +743,17 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.altair_chart((points),use_container_width=True)
     # st.altair_chart((points+text),use_container_width=True)
 
-    source = pd.DataFrame({
-    'x': [1, 3, 5, 7, 9],
-    'y': [1, 3, 5, 7, 9],
-    'label': ['A', 'B', 'C', 'D', 'E']})
+    # source = pd.DataFrame({
+    # 'x': [1, 3, 5, 7, 9],
+    # 'y': [1, 3, 5, 7, 9],
+    # 'label': ['A', 'B', 'C', 'D', 'E']})
 
-    points = alt.Chart(source).mark_point().encode(alt.X('x:Q'),alt.Y('y:Q',scale=alt.Scale(domain=(2,9))))
+    # points = alt.Chart(source).mark_point().encode(alt.X('x:Q'),alt.Y('y:Q',scale=alt.Scale(domain=(2,9))))
 
-    text = points.mark_text(
-    align='left',
-    baseline='middle',
-    dx=7).encode(text='label')
+    # text = points.mark_text(
+    # align='left',
+    # baseline='middle',
+    # dx=7).encode(text='label')
 
     # st.altair_chart(points + text)
 
