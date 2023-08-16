@@ -640,6 +640,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True).sort_values(by=['ID','Week'],ascending=True)
 
     test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
+    
 
     df_portion_with_top_seeds=test_df_2[test_df_2['ID']<9].copy()
     df_portion_with_top_seeds=df_portion_with_top_seeds[~df_portion_with_top_seeds['Away_Team_ID'].isin([9,10,11])]
@@ -649,11 +650,12 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0).sort_values(by=['ID','Week','Date']).reset_index(drop=True)
 
     # before the regression
-    # st.write('test_df 2 before regression, is Spread ok check Limerick out', test_df_2)
+    st.write('test_df 2 what is it, can i go back to week 0 and then shift the results', test_df_2)
     # could try the for loop in here with week and the results to a list
+    # st.write()
     week_regression_current=13
     list_regression_results=[]
-    for x in range(2,week_regression_current+1):
+    for x in range(1,week_regression_current+1):
         # st.write('x', x)
         y=test_df_2[test_df_2['Week']<x]
         week_results=y[y['Week']==(x-1)]
@@ -672,6 +674,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.write('before ID change', df_regression_list)
     df_regression_list['Other Team ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
     df_regression_list['Other Team ID']=df_regression_list['Other Team ID'].astype(int)
+    st.write('output from regression so merge this into the betting sheet', df_regression_list)
 
     # https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
     seq = [0, 1, 2, 3, 4, 5]
