@@ -227,7 +227,8 @@ def season_cover_2(season_cover_df,column_name):
     # https://stackoverflow.com/questions/54993050/pandas-groupby-shift-and-cumulative-sum
     # season_cover_df[column_name] = season_cover_df.groupby (['ID'])[column_name].transform(lambda x: x.cumsum().shift())
     # THE ABOVE DIDN'T WORK IN 2020 PRO FOOTBALL BUT DID WORK IN 2019 DO NOT DELETE FOR INFO PURPOSES
-    season_cover_df[column_name] = season_cover_df.groupby (['ID'])[column_name].apply(lambda x: x.cumsum().shift())
+    season_cover_df[column_name] = season_cover_df.groupby (['ID'],group_keys=False)[column_name].apply(lambda x: x.cumsum().shift())
+    # https://stackoverflow.com/questions/76067357/why-is-there-a-typeerror-incompatible-index-of-inserted-column-with-frame-inde
     season_cover_df=season_cover_df.reset_index().sort_values(by=['Week','Date','ID'],ascending=True).drop('index',axis=1)
     # Be careful with this if you want full season, season to date cover, for week 17, it is season to date up to week 16
     # if you want full season, you have to go up to week 18 to get the full 17 weeks, just if you want to do analysis on season covers
@@ -262,7 +263,7 @@ spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
 # st.write('this is kilkeeny spread cover in here',spread_3.sort_values(by=['ID','Week']).set_index('Week'))
 
 matrix_df=spread_workings(data)
-# st.write('line 203', matrix_df)
+st.write('duplicates in matrix df??', matrix_df[(matrix_df['Home Team']=='Limerick') |  (matrix_df['Away Team']=='Limerick') ].sort_values(by='Week'))
 matrix_df=matrix_df.reset_index().rename(columns={'index':'unique_match_id'})
 team_total_master_data=matrix_df.copy()
 # st.write('base data', team_total_master_data)
@@ -619,9 +620,19 @@ with st.expander('Penalty Factor by Match Graph'):
 
 with st.expander('Team Totals Cleaned UP and automated for every week'):
     pre_season=team_total_master_data[team_total_master_data['Week']<1].copy()
-    # st.write('pre-season', pre_season)
-    team_total_master_data=pd.concat([team_total_master_data,pre_season],ignore_index=True).drop('Week',axis=1).rename(columns={'week_regression':'Week'})
-    # st.write('concat work ok??',team_total_master_data.sort_values(by='Week'))
+    # st.write('pre-season LOOKS OK', pre_season[(pre_season['Home Team']=='Limerick')\
+    #                                                         |  (pre_season['Away Team']=='Limerick') ].sort_values(by='Week'))
+
+    # st.write('Team total data looks OK', team_total_master_data[(team_total_master_data['Home Team']=='Limerick')\
+    #                                                         |  (team_total_master_data['Away Team']=='Limerick') ].sort_values(by='Week'))
+
+    # Why was the below done looks wierd
+    # team_total_master_data=pd.concat([team_total_master_data,pre_season],ignore_index=True).drop('Week',axis=1).rename(columns={'week_regression':'Week'})
+    # my alternative
+    team_total_master_data=team_total_master_data.drop('Week',axis=1).rename(columns={'week_regression':'Week'}).copy()
+
+    # st.write('duplicates in here - YES',team_total_master_data[(team_total_master_data['Home Team']=='Limerick')\
+    #                                                         |  (team_total_master_data['Away Team']=='Limerick') ].sort_values(by='Week'))
     team_total_master_data['at_home'] = 1
     team_total_master_data['at_away'] = -1
     team_total_master_data['away_spread']=team_total_master_data['Away_Total_Points']
@@ -636,9 +647,10 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     test_df_away=team_total_master_data.loc[:,['Week','Date','Away ID','at_away','away_spread','Away Spread','Closing_Total','Home ID']]\
         .rename(columns={'Home ID':'Home_Team_ID','Away ID':'ID','Away Spread':'Spread','at_away':'home','away_spread':'team_total_points',}).copy()
     
-
+    # st.write('duplicate home?',test_df_home.sort_values(by=['ID','Week']))
+    # st.write('duplicate away?',test_df_away)
     test_df_2=pd.concat([test_df_home,test_df_away],ignore_index=True).sort_values(by=['ID','Week'],ascending=True)
-
+    # st.write('is there duplication in here YES',test_df_2)
     test_df_2=test_df_2.dropna(subset=['Closing_Total']) # the westmeath etc games didnt have totals
     
 
@@ -648,8 +660,11 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # so basically im splitting the teams up as the bottom 3 are bad and are skewing the regression
     df_portion_with_bottom_seeds=test_df_2[test_df_2['ID']>8].copy()
     test_df_2=pd.concat([df_portion_with_top_seeds,df_portion_with_bottom_seeds],ignore_index=True,axis=0).sort_values(by=['ID','Week','Date']).reset_index(drop=True)
+    # st.write('top seeds check for duplication before concat YES DUPLICATION',df_portion_with_top_seeds)
+    # st.write('bottom seeds check for duplication before concat',df_portion_with_bottom_seeds)
 
     # before the regression
+    # st.write('duplication in here fix')
     st.write('test_df 2 what is it, can i go back to week 0 and then shift the results', test_df_2)
     # could try the for loop in here with week and the results to a list
     # st.write()
@@ -674,7 +689,10 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     # st.write('before ID change', df_regression_list)
     df_regression_list['Other Team ID'] = df_regression_list['Away_Team_ID'].fillna(0)+df_regression_list['Home_Team_ID'].fillna(0)
     df_regression_list['Other Team ID']=df_regression_list['Other Team ID'].astype(int)
-    st.write('output from regression so merge this into the betting sheet', df_regression_list)
+    df_regression_list=df_regression_list.sort_values(by=['ID','Week'])
+    df_regression_list['coeffic']=df_regression_list.groupby('ID')[0].shift()
+    df_regression_list['intercept']=df_regression_list.groupby('ID')[1].shift()
+    st.write('output from regression so merge this into the betting sheet', df_regression_list.sort_values(by=['ID','Week']))
 
     # https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
     seq = [0, 1, 2, 3, 4, 5]
@@ -1096,12 +1114,13 @@ with st.expander('Analysis of Factors'):
         home_cover=analysis_factors['home_cover_season_success?'].value_counts()
         away_cover=analysis_factors['away_cover_season_success?'].value_counts()
         power=analysis_factors['power_ranking_success?'].value_counts()
+        st.write('df_table', df_table)
         df_table_1=pd.concat([df_table,away_turnover,home_cover,away_cover,power],axis=1)
         # df_table_1=pd.concat([df_table,away_turnover,home_cover,away_cover,power],axis=1).reset_index().drop('index',axis=1)
         # st.write('df table', df_table_1)
         # test=df_table_1.reset_index()
-        # st.write(test)
-        df_table_1['total_turnover'] = df_table_1['home_turnover_success?'].add (df_table_1['away_turnover_success?'])
+        st.write('home turnover success issue????', df_table_1)
+        df_table_1['total_turnover'] = df_table_1['home_turnover_success?'] + df_table_1['away_turnover_success?']
         # st.write(test)
         df_table_1['total_season_cover'] = df_table_1['home_cover_season_success?'] + df_table_1['away_cover_season_success?']
         
