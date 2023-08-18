@@ -249,7 +249,7 @@ spread_1_total_team = season_cover_workings(spread,'home_cover_total_team','away
 # st.write('is this working. Answer for Kilkenny Yes', spread_1_total_team.sort_values(by=['ID','Week']))
 # st.write('check limerick total cover in here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']))
 # st.write('Kilkenny team cover check here', spread[(spread['Home Team']=='Kilkenny') |  (spread['Away Team']=='Kilkenny') ].sort_values(by=['Week','Date']).set_index('Week'))
-st.write('Limerick team cover check here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']).set_index('Week'))
+# st.write('Limerick team cover check here', spread[(spread['Home Team']=='Limerick') |  (spread['Away Team']=='Limerick') ].sort_values(by=['Week','Date']).set_index('Week'))
 spread_1_total = season_cover_workings_total(spread,'home_cover_total','away_cover_total','cover_total',0)
 # st.write('check Kilkenny total cover LOOKS WIERD INVESTIGATE', spread_1_total.sort_values(by=['ID','Week','Date']))
 spread_2=season_cover_2(spread_1,'cover')
@@ -263,7 +263,7 @@ spread_3_total=season_cover_3(spread_2_total,'cover_sign_total','cover_total')
 # st.write('this is kilkeeny spread cover in here',spread_3.sort_values(by=['ID','Week']).set_index('Week'))
 
 matrix_df=spread_workings(data)
-st.write('duplicates in matrix df??', matrix_df[(matrix_df['Home Team']=='Limerick') |  (matrix_df['Away Team']=='Limerick') ].sort_values(by='Week'))
+# st.write('duplicates in matrix df??', matrix_df[(matrix_df['Home Team']=='Limerick') |  (matrix_df['Away Team']=='Limerick') ].sort_values(by='Week'))
 matrix_df=matrix_df.reset_index().rename(columns={'index':'unique_match_id'})
 team_total_master_data=matrix_df.copy()
 # st.write('base data', team_total_master_data)
@@ -665,7 +665,7 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
 
     # before the regression
     # st.write('duplication in here fix')
-    st.write('test_df 2 what is it, can i go back to week 0 and then shift the results', test_df_2)
+    # st.write('test_df 2 what is it, can i go back to week 0 and then shift the results', test_df_2)
     # could try the for loop in here with week and the results to a list
     # st.write()
     week_regression_current=13
@@ -699,7 +699,8 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     window_size = 3
 
     for i in range(len(seq) - window_size + 1):
-        st.write(seq[i: i + window_size])
+        # st.write(seq[i: i + window_size])
+        pass
 
     # st.write('regression list',df_regression_list)
     # st.write(df_regression_list['Other Team ID'].dtype)
@@ -710,9 +711,27 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     df_regression_list=pd.merge(df_regression_list,team_names_id_3,on='Other Team ID',how='outer').rename(columns={'Home Team':'Opponent'})
     df_regression_list['date_string']=df_regression_list['Date'].dt.strftime('%d-%b')
     df_regression_list['opp_date']=df_regression_list['date_string'] + " " + df_regression_list['Opponent']
-
+    regression_merge_part_HOME=df_regression_list.loc[df_regression_list['home']==1,['Week','Date','ID','Other Team ID','coeffic','intercept']]\
+    .rename(columns={'ID':'Home ID','Other Team ID': 'Away ID','Week':'week_regression','coeffic':'home_coeffic','intercept':'home_intercept'})
+    regression_merge_part_AWAY=df_regression_list.loc[df_regression_list['home']==-1,['Week','Date','ID','Other Team ID','coeffic','intercept']]\
+    .rename(columns={'ID':'Away ID','Other Team ID': 'Home ID','Week':'week_regression','coeffic':'away_coeffic','intercept':'away_intercept'})
+    # st.write('reg home', regression_merge_part_HOME)
+    # st.write('how do i merge in should check the spread workings to see how i merged those in')
+    # st.write('to merge into updated df', updated_df.head())
+    updated_df=pd.merge(updated_df,regression_merge_part_HOME,on=['week_regression','Date','Home ID','Away ID'])
+    updated_df=pd.merge(updated_df,regression_merge_part_AWAY,on=['week_regression','Date','Home ID','Away ID'])
     st.write('output of list from function after updating for ID change', df_regression_list.sort_values(by=['ID','Week'],ascending=[True,True]))
-    # st.write('team names id', team_names_id)
+    updated_df['home_est_pts']=(updated_df['calculated_spread']*updated_df['home_coeffic'])+updated_df['home_intercept']
+    updated_df['away_est_pts']=(updated_df['calculated_spread']*updated_df['away_coeffic'])+updated_df['away_intercept']
+    updated_df['est_total_pts']=updated_df['home_est_pts']+updated_df['away_est_pts']
+    updated_df['power_total_pick']=np.where(updated_df['est_total_pts'] < updated_df['Closing_Total'],-1,1)
+    updated_df['total_actual_pts']=updated_df['Home Points']+updated_df['Away Points']
+    cols_to_move=['Week','Date','Home Team','Away Team','Home Points','Away Points','total_actual_pts','Closing_Total','est_total_pts','power_total_pick','Spread',
+                                                     'Home_Total_Points','Away_Total_Points']
+    cols = cols_to_move + [col for col in updated_df if col not in cols_to_move]
+    updated_df=updated_df[cols].sort_values(by=['Date','Home ID'])
+
+    st.write('UPDATED DF after merge', updated_df)
     
 
     st.write('i need to calculate the season to date cover on total points and team total points versus actual')
@@ -1115,6 +1134,10 @@ with st.expander('Analysis of Factors'):
         away_cover=analysis_factors['away_cover_season_success?'].value_counts()
         power=analysis_factors['power_ranking_success?'].value_counts()
         st.write('df_table', df_table)
+        st.write('home cover', home_cover)
+        st.write('home cover', away_cover)
+        st.write('away turnover', away_turnover)
+        st.write('power', power)
         df_table_1=pd.concat([df_table,away_turnover,home_cover,away_cover,power],axis=1)
         # df_table_1=pd.concat([df_table,away_turnover,home_cover,away_cover,power],axis=1).reset_index().drop('index',axis=1)
         # st.write('df table', df_table_1)
