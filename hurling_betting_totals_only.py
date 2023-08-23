@@ -20,8 +20,7 @@ last_week=2 # what is this for?? its for graphing i think
 number_of_teams=12
 min_factor=2
 
-st.write('Just need to check the power for the totals and team totals and add that into the mix....')
-
+st.write('is home cover total working right, need to get the results, check season to date section cover')
 
 # @st.cache
 def read_data(file):
@@ -241,6 +240,7 @@ def season_cover_2_total(season_cover_df,column_name):
 
 spread=spread_workings(data)
 spread=spread_workings_total(spread)
+st.write('is home cover total working right??? YES IT IS', spread)
 spread=spread_workings_total_team(spread)
 # st.write('this is the data to work with for spread workings is TOTAL in here', spread)
 # with st.beta_expander('Season to date Cover'):
@@ -464,6 +464,7 @@ with st.expander('Season to Date Cover Factor by Team'):
     updated_df_total=season_total(spread_3_total,updated_df_1)
     # st.write('does it work ok after using the different function on it', updated_df_total)
     updated_df=season_total_team(spread_3_total_team,updated_df_total)
+    st.write('is home cover total working right in here', updated_df)
     # st.write('does this work after function', updated_df_total_team)
     # st.write('Kilkenny team total is wrong on graph should be a -1 and it is a +1')
     # st.write('updated df total', updated_df_total)
@@ -618,6 +619,7 @@ with st.expander('Penalty Factor by Match Graph'):
 #     updated_df_with_momentum['momentum_pick']=np.where(updated_df_with_momentum['Spread']==updated_df_with_momentum['Opening Spread'],0,np.where(
 #         updated_df_with_momentum['Spread']<updated_df_with_momentum['Opening Spread'],1,-1))
 
+# sourcery skip: for-index-underscore, remove-empty-nested-block
 with st.expander('Team Totals Cleaned UP and automated for every week'):
     pre_season=team_total_master_data[team_total_master_data['Week']<1].copy()
     # st.write('pre-season LOOKS OK', pre_season[(pre_season['Home Team']=='Limerick')\
@@ -950,7 +952,10 @@ with placeholder_2.expander('Betting Slip Matches'):
         
         betting_matches['bet_sign'] = betting_matches['bet_sign'].astype(float)
         betting_matches['home_cover'] = betting_matches['home_cover'].astype(float)
+        betting_matches['home_cover_total'] = betting_matches['home_cover_total'].astype(float)
         betting_matches['result']=betting_matches['home_cover_result'] * betting_matches['bet_sign']
+        betting_matches['result_totals']=betting_matches['home_cover_total'] * betting_matches['bet_sign_totals']
+
         # st.write('testing sum of betting result',betting_matches['result'].sum())
         # this is for graphing anlaysis on spreadsheet
         betting_matches['bet_sign_all'] = (np.where(betting_matches['total_factor']>0,1,np.where(betting_matches['total_factor']<-0,-1,0)))
@@ -962,7 +967,7 @@ with placeholder_2.expander('Betting Slip Matches'):
 
 
         cols_to_move=['Week','Date','Home Team','Away Team','over_under_factor','bet_on_totals','Home Points','Away Points',
-                      'home_cover_total','home_cover_sign_total','away_cover_total','away_cover_sign_total',
+                      'home_cover_total','result_totals','home_cover_sign_total','away_cover_total','away_cover_sign_total',
                       'home_cover_total_team','home_cover_sign_total_team','away_cover_total_team','away_cover_sign_total_team',
                       'home_cover','home_cover_sign','away_cover','away_cover_sign']
         cols = cols_to_move + [col for col in betting_matches if col not in cols_to_move]
@@ -998,7 +1003,7 @@ with placeholder_2.expander('Betting Slip Matches'):
 
 
 
-
+    # st.dataframe(betting_matches,column_config={)
     presentation_betting_matches=betting_matches.copy()
 
     # https://towardsdatascience.com/7-reasons-why-you-should-use-the-streamlit-aggrid-component-2d9a2b6e32f0
@@ -1042,7 +1047,7 @@ with placeholder_2.expander('Betting Slip Matches'):
         width='100%',
         # data_return_mode=return_mode_value, 
         # update_mode=update_mode_value,
-        # fit_columns_on_grid_load=fit_columns_on_grid_load,
+        # fit_columns_on_grid_load=True,
         allow_unsafe_jscode=True, #Set it to True to allow jsfunction to be injected
         enable_enterprise_modules=True,
     )
