@@ -696,13 +696,17 @@ with st.expander('Team Totals Cleaned UP and automated for every week'):
     df_regression_list['intercept']=df_regression_list.groupby('ID')[1].shift()
     st.write('output from regression so merge this into the betting sheet', df_regression_list.sort_values(by=['ID','Week']))
 
+
     # https://stackoverflow.com/questions/6822725/rolling-or-sliding-window-iterator
     seq = [0, 1, 2, 3, 4, 5]
     window_size = 3
 
     for i in range(len(seq) - window_size + 1):
-        # st.write(seq[i: i + window_size])
-        pass
+        st.write('sequence', seq)
+        st.write('i',i)
+        st.write('seq i+window',seq[i: i + window_size] )
+        st.write(seq[i: i + window_size])
+        # pass
 
     # st.write('regression list',df_regression_list)
     # st.write(df_regression_list['Other Team ID'].dtype)
