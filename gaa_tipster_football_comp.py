@@ -22,23 +22,38 @@ st.write('picks listing',all_weeks_picks_made)
 
 master_listing=pd.merge(odds_pts_listing,football_results,on=['Date','Home Team','Away Team'],how='outer', indicator=True)
 master_listing['betting_favourite']=np.where(master_listing['Home_odds']<master_listing['Away_odds'],1,np.where(master_listing['Away_odds']<master_listing['Home_odds'],-1,0))
+master_listing['betting_favourite_name']=np.where(master_listing['Home_odds']<master_listing['Away_odds'],master_listing['Home Team'],
+                                                  np.where(master_listing['Away_odds']<master_listing['Home_odds'],master_listing['Away Team'],"Pick 'em"))
 st.write('combined always check the merge indicator', master_listing)
 
 updated_pick_listing=pd.merge(all_weeks_picks_made,master_listing.loc[:,['Date','match_ID','Home Team','Away Team','Home_comp_pts',
-                                                                         'Away_comp_pts','Draw_comp_pts','home_win','betting_favourite']]\
+                                                                         'Away_comp_pts','Draw_comp_pts','home_win','betting_favourite','betting_favourite_name']]\
                               ,on=['match_ID'],how='outer',indicator=True)
 
 
 updated_pick_listing['pick_id']=np.where(updated_pick_listing['pick_selection']==updated_pick_listing['Home Team'],1,
                                          np.where(updated_pick_listing['pick_selection']==updated_pick_listing['Away Team'],-1,0))
 
+# updated_pick_listing['pick_id_name']=np.where(updated_pick_listing['pick_selection']==updated_pick_listing['Home Team'],updated_pick_listing['Home Team'],
+#                                          np.where(updated_pick_listing['pick_selection']==updated_pick_listing['Away Team'],updated_pick_listing['Away Team'],'Draw'))
+
 updated_pick_listing['pick_result']=np.where(updated_pick_listing['pick_id']==updated_pick_listing['home_win'],1,0)
 updated_pick_listing['pick_pts']=np.where(updated_pick_listing['pick_id']==1,updated_pick_listing['Home_comp_pts']*updated_pick_listing['pick_result'],
                                           np.where(updated_pick_listing['pick_id']==-1,updated_pick_listing['Away_comp_pts']*updated_pick_listing['pick_result'],
                                           updated_pick_listing['Draw_comp_pts']*updated_pick_listing['pick_result']))
 
+draw_picked = updated_pick_listing['pick_selection']=='Draw'
+
 # updated_pick_listing['user_betting_fav_picked'] = np.where(updated_pick_listing['betting_favourite'] == updated_pick_listing['pick_id'],1,-1)
 # updated_pick_listing['user_betting_fav_picked'] = updated_pick_listing['betting_favourite'] * updated_pick_listing['pick_id']
+# updated_pick_listing['user_betting_fav_picked'] = np.where(updated_pick_listing['pick_selection')
+not_equal_to_draw=updated_pick_listing['pick_selection']!='Draw'
+favourite_picked=updated_pick_listing['pick_selection']==updated_pick_listing['betting_favourite_name']
+pick_em=updated_pick_listing['betting_favourite_name']=="Pick 'em"
+updated_pick_listing['favourite_picked']=updated_pick_listing['betting_favourite_name'].where(not_equal_to_draw & favourite_picked)
+updated_pick_listing['draw_picked'] = updated_pick_listing['pick_selection'].where(draw_picked)
+updated_pick_listing['pick_em']=updated_pick_listing['betting_favourite_name'].where(not_equal_to_draw & pick_em)
+# updated_pick_listing['underdog_picked'] = 
 
 # st.write('update', updated_pick_listing[updated_pick_listing['Name'].str.contains('Noel')])
 st.write('update', updated_pick_listing)
