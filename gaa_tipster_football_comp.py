@@ -93,7 +93,7 @@ master_listing['hold_%']=(1-((master_listing['Away_odds']-1)*(master_listing['Ho
 # st.write(master_listing.dtypes)
 updated_pick_listing=pd.merge(all_weeks_picks_made,master_listing.loc[:,['Date','match_ID','Home Team','Away Team','Home_comp_pts',
                                                                          'Away_comp_pts','Draw_comp_pts','home_win','betting_favourite',
-                                                                         'betting_favourite_name','betting_underdog_name']]\
+                                                                         'betting_favourite_name','betting_underdog_name','Home_odds','Away_odds']]\
                               ,on=['match_ID'],how='outer',indicator=True)
 
 
@@ -104,6 +104,10 @@ updated_pick_listing['pick_id']=np.where(updated_pick_listing['pick_selection']=
 #                                          np.where(updated_pick_listing['pick_selection']==updated_pick_listing['Away Team'],updated_pick_listing['Away Team'],'Draw'))
 
 updated_pick_listing['pick_result']=np.where(updated_pick_listing['pick_id']==updated_pick_listing['home_win'],1,0)
+updated_pick_listing['betting_result']=np.where(updated_pick_listing['pick_id']==updated_pick_listing['home_win'],1,np.where(updated_pick_listing['pick_id']==0,np.NaN,-1))
+
+updated_pick_listing['betting_odds_picked']=np.where(updated_pick_listing['pick_id']==1,updated_pick_listing['Home_odds'],np.where(updated_pick_listing['pick_id']==-1,updated_pick_listing['Away_odds'],0))
+updated_pick_listing['betting_profit_loss']=np.where(updated_pick_listing['betting_result']==1,(updated_pick_listing['betting_odds_picked']*100)-100,np.where(updated_pick_listing['betting_result']==-1,-100,np.NaN))
 updated_pick_listing['pick_pts']=np.where(updated_pick_listing['pick_id']==1,updated_pick_listing['Home_comp_pts']*updated_pick_listing['pick_result'],
                                           np.where(updated_pick_listing['pick_id']==-1,updated_pick_listing['Away_comp_pts']*updated_pick_listing['pick_result'],
                                           updated_pick_listing['Draw_comp_pts']*updated_pick_listing['pick_result']))
@@ -133,24 +137,24 @@ updated_pick_listing['check_sum']=(updated_pick_listing.loc[:,['underdog_picked_
 
 # st.write('update', updated_pick_listing[updated_pick_listing['Name'].str.contains('Noel')])
 
-boc_df= updated_pick_listing[ (updated_pick_listing['Name'].str.contains('Joint_Winner')) & (updated_pick_listing['Week']==4)]\
-         .loc[:,['Week','Name','match_ID','pick_selection','Home Team', 'Away Team','Home_comp_pts','Away_comp_pts','home_win','pick_pts']]
-thomas_df= updated_pick_listing[ (updated_pick_listing['Name'].str.contains('Winner_Joint')) & (updated_pick_listing['Week']==4)]\
-         .loc[:,['match_ID','pick_selection','pick_pts']].rename(columns={'Name':'Name_person','pick_selection':'person_pick','pick_pts':'person_pts'})
-merged_check=pd.merge(boc_df,thomas_df,on='match_ID',how='outer',indicator=True)
-darragh_df= updated_pick_listing[ (updated_pick_listing['Name'].str.contains('Darragh')) & (updated_pick_listing['Week']==4)]\
-         .loc[:,['match_ID','pick_selection','pick_pts']].rename(columns={'Name':'Darragh','pick_selection':'darragh_pick','pick_pts':'darragh_pts'})
-merged_check=pd.merge(merged_check,darragh_df,on='match_ID',how='outer')
-cols_to_move=['Week','match_ID','pick_selection','pick_pts','person_pick','person_pts','darragh_pick','darragh_pts','Home_comp_pts','Away_comp_pts','home_win','Home Team', 'Away Team']
-cols = cols_to_move + [col for col in merged_check if col not in cols_to_move]
-merged_check=merged_check[cols]
+# boc_df= updated_pick_listing[ (updated_pick_listing['Name'].str.contains('Joint_Winner')) & (updated_pick_listing['Week']==4)]\
+#          .loc[:,['Week','Name','match_ID','pick_selection','Home Team', 'Away Team','Home_comp_pts','Away_comp_pts','home_win','pick_pts']]
+# thomas_df= updated_pick_listing[ (updated_pick_listing['Name'].str.contains('Winner_Joint')) & (updated_pick_listing['Week']==4)]\
+#          .loc[:,['match_ID','pick_selection','pick_pts']].rename(columns={'Name':'Name_person','pick_selection':'person_pick','pick_pts':'person_pts'})
+# merged_check=pd.merge(boc_df,thomas_df,on='match_ID',how='outer',indicator=True)
+# darragh_df= updated_pick_listing[ (updated_pick_listing['Name'].str.contains('Darragh')) & (updated_pick_listing['Week']==4)]\
+#          .loc[:,['match_ID','pick_selection','pick_pts']].rename(columns={'Name':'Darragh','pick_selection':'darragh_pick','pick_pts':'darragh_pts'})
+# merged_check=pd.merge(merged_check,darragh_df,on='match_ID',how='outer')
+# cols_to_move=['Week','match_ID','pick_selection','pick_pts','person_pick','person_pts','darragh_pick','darragh_pts','Home_comp_pts','Away_comp_pts','home_win','Home Team', 'Away Team']
+# cols = cols_to_move + [col for col in merged_check if col not in cols_to_move]
+# merged_check=merged_check[cols]
 # st.write('Selection', merged_check)
 
 # st.write('check for draws looks like it works', updated_pick_listing[updated_pick_listing['pick_id']==0])
 
 user_results=updated_pick_listing.groupby(['Week','Name']).agg(count_winning_picks=('pick_result','sum'),sum_winning_picks=('pick_pts','sum'),
         sum_favourite_picks=('favourite_picked_1','sum'),sum_underdog_picks=('underdog_picked_1','sum'),
-        sum_draw_picks=('draw_picked_1','sum'),sum_pickem_picks=('pick_em_1','sum'))\
+        sum_draw_picks=('draw_picked_1','sum'),sum_pickem_picks=('pick_em_1','sum'),betting_result=('betting_profit_loss','sum'),betting_count=('betting_profit_loss','count'),betting_average=('betting_profit_loss','mean'))\
     .sort_values(by=['Week','sum_winning_picks'],ascending=[True,False]).reset_index()
 user_results=pd.merge(user_results,check_totals,how='outer',indicator=True)
 user_results['check_diff']=user_results['sum_winning_picks'] - user_results['total']
@@ -216,11 +220,40 @@ with st.expander('Number of Draws picked by Entrant by Week'):
     # image=Image.open("https://raw.githubusercontent.com/ZeNoonan/gaa/master/bernie_sanders.jpg")
     st.image(image)
 
+with st.expander('Betting result by Entrant by Week'):
 
+    st.write("I know, I know, this isn't what the comp is about, but anyway fun to look at...what would the betting profit or loss be if everyone bet €100 on each selection made?  I only have odds for the 2-way market where you can only back a team to win and where draws are pushes, so any draws picked by entrant or any result that is a draw doesn't count")
+
+    user_results=updated_pick_listing.groupby(['Name']).agg(betting_result=('betting_profit_loss','sum'),
+                                                            betting_count=('betting_profit_loss','count'),betting_average=('betting_profit_loss','mean'))\
+    .sort_values(by=['betting_result'],ascending=[False]).reset_index()
+    graph_user_count_winning_picks=user_results.loc[:,['Name','betting_result','betting_count','betting_average']]
+    graph_user_count_winning_picks=graph_user_count_winning_picks[~graph_user_count_winning_picks['Name'].str.contains('inner')]
+    
+    st.write('Total Betting Profit or Loss below')
+    st.altair_chart(alt.Chart(graph_user_count_winning_picks).mark_bar(size=50).encode(
+        alt.X('Name:O'),
+        alt.Y('betting_result:Q',title='Betting Profit or Loss'),
+        color=alt.condition(
+        alt.datum.betting_result > 0,
+        alt.value("steelblue"),  # The positive color
+        alt.value("orange"))  # The negative color
+        # alt.Column('Name:N',title='Number of correct selections picked by Week')
+    ),use_container_width=True)
+
+    st.write('Number of Bets made below')
+    st.altair_chart(alt.Chart(graph_user_count_winning_picks).mark_bar(size=50).encode(
+        alt.X('Name:O'),
+        alt.Y('betting_count:Q',title='Number of Bets made')
+        # alt.Column('Name:N',title='Number of correct selections picked by Week')
+    ),use_container_width=True)
+
+    format_dict = {'betting_result':'€{0:,.0f}','betting_average':'€{0:,.1f}'}
+    st.write(graph_user_count_winning_picks.set_index('Name').style.format(format_dict))
 with st.expander('Summary results by Entrant'):
     st.write('Summary results by Entrant ', user_results)
 
-with st.expander('Summary results by Entrant'):
+with st.expander('Detail results by Entrant'):
     st.write('Detailed Data Listing', updated_pick_listing)
 # st.altair_chart(alt.Chart(graph_user_results).mark_bar().encode(
 #     alt.X('betting:O'),
