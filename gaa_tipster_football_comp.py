@@ -3,6 +3,8 @@ import numpy as np
 import streamlit as st
 import altair as alt
 from PIL import Image
+import requests
+from io import BytesIO
 # from vega_datasets import data
 # from altair.expr import datum, if_
 
@@ -205,8 +207,13 @@ with st.expander('Number of Draws picked by Entrant by Week'):
         alt.Y('amount:Q',title='No. Draw Picks made'),
         alt.Column('Name:N',title='Number of Draws picked by Week')
     ))
+
+    def get_image():
+        response = requests.get("https://raw.githubusercontent.com/ZeNoonan/gaa/master/bernie_sanders.jpg")
+        return Image.open(BytesIO(response.content))
     # image=Image.open("C:/Users/Darragh/Documents/Python/gaa/bernie_sanders.jpg")
-    image=Image.open("https://raw.githubusercontent.com/ZeNoonan/gaa/master/bernie_sanders.jpg")
+    image=get_image()
+    # image=Image.open("https://raw.githubusercontent.com/ZeNoonan/gaa/master/bernie_sanders.jpg")
     st.image(image)
 
 
