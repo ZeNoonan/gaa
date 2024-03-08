@@ -231,7 +231,7 @@ with st.expander('Betting result by Entrant by Week'):
     graph_user_count_winning_picks=graph_user_count_winning_picks[~graph_user_count_winning_picks['Name'].str.contains('inner')]
     
     st.write('Total Betting Profit or Loss below')
-    st.altair_chart(alt.Chart(graph_user_count_winning_picks).mark_bar(size=50).encode(
+    st.altair_chart(alt.Chart(graph_user_count_winning_picks).mark_bar().encode(
         alt.X('Name:O'),
         alt.Y('betting_result:Q',title='Betting Profit or Loss'),
         color=alt.condition(
@@ -242,7 +242,7 @@ with st.expander('Betting result by Entrant by Week'):
     ))
 
     st.write('Number of Bets made below')
-    st.altair_chart(alt.Chart(graph_user_count_winning_picks).mark_bar(size=50).encode(
+    st.altair_chart(alt.Chart(graph_user_count_winning_picks).mark_bar().encode(
         alt.X('Name:O'),
         alt.Y('betting_count:Q',title='Number of Bets made')
         # alt.Column('Name:N',title='Number of correct selections picked by Week')
