@@ -239,14 +239,14 @@ with st.expander('Betting result by Entrant by Week'):
         alt.value("steelblue"),  # The positive color
         alt.value("orange"))  # The negative color
         # alt.Column('Name:N',title='Number of correct selections picked by Week')
-    ),use_container_width=True)
+    ))
 
     st.write('Number of Bets made below')
     st.altair_chart(alt.Chart(graph_user_count_winning_picks).mark_bar(size=50).encode(
         alt.X('Name:O'),
         alt.Y('betting_count:Q',title='Number of Bets made')
         # alt.Column('Name:N',title='Number of correct selections picked by Week')
-    ),use_container_width=True)
+    ))
 
     format_dict = {'betting_result':'€{0:,.0f}','betting_average':'€{0:,.1f}'}
     st.write(graph_user_count_winning_picks.set_index('Name').style.format(format_dict))
