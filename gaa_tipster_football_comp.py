@@ -10,12 +10,12 @@ from io import BytesIO
 
 st.set_page_config(layout="wide")
 
-# odds_pts_listing = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date'])
+odds_pts_listing = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date'])
 
-# pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date']).\
-#     to_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
-# odds_pts_listing=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
-odds_pts_listing=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/odds_pts_listing.parq')
+pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date']).\
+    to_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
+odds_pts_listing=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
+# odds_pts_listing=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/odds_pts_listing.parq')
 
 # pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_1').\
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_1.parq')
@@ -27,6 +27,8 @@ odds_pts_listing=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_4.parq')
 # pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_5').\
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_5.parq')
+pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_6').\
+    to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_6.parq')
 # pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='check_totals').\
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/check_totals.parq')
 
@@ -35,6 +37,8 @@ odds_pts_listing=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa
 # week_3 = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_3')
 # week_4 = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_4')
 # week_5 = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_5')
+# week_5 = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_6')
+
 # check_totals=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='check_totals')
 
 # week_1 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_1.parq")
@@ -42,28 +46,36 @@ odds_pts_listing=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa
 # week_3 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_3.parq")
 # week_4 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_4.parq")
 # week_5 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_5.parq")
+week_6 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_6.parq")
 week_1 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_1.parq")
 week_2 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_2.parq")
 week_3 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_3.parq")
 week_4 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_4.parq")
 week_5 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_5.parq")
 
-# check_totals=pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/check_totals.parq")
+pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='check_totals').\
+    to_parquet('C:/Users/Darragh/Documents/Python/gaa/check_totals.parq')
 check_totals=pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/check_totals.parq")
+# check_totals=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024_prov.xlsx",sheet_name='check_totals')
+
+check_totals=pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/check_totals.parq")
+
 # st.write('week 1 before',week_1.dtypes)
 # st.write(week_1)
-# check_totals=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024_prov.xlsx",sheet_name='check_totals')
+
 # football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football 5_feb_24.xlsx",sheet_name='2024',header=0)\
 #     .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
-# football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football_2024.xlsx",sheet_name='2024',header=0)\
-#     .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
-# football_results.to_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
-# football_results=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
-football_results=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/football_results.parq')
+# football_results=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/football_results.parq')
 # football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football_2024_prov.xlsx",sheet_name='2024',header=0)\
 #     .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
-
+football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football_2024.xlsx",sheet_name='2024',header=0)\
+    .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
+# st.write('check football results local', football_results)
+football_results.to_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
+football_results=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
+# st.write('')
 football_results['home_win']=np.where(football_results['Sc']>football_results['Sc.1'],1,np.where(football_results['Sc']<football_results['Sc.1'],-1,0))
+# st.write('check football results', football_results)
 
 week_1=pd.melt(week_1,id_vars=['Week','Name'],var_name='match_ID',value_name='pick_selection')
 # st.write(week_1)
@@ -71,14 +83,18 @@ week_2=pd.melt(week_2,id_vars=['Week','Name'],var_name='match_ID',value_name='pi
 week_3=pd.melt(week_3,id_vars=['Week','Name'],var_name='match_ID',value_name='pick_selection')
 week_4=pd.melt(week_4,id_vars=['Week','Name'],var_name='match_ID',value_name='pick_selection')
 week_5=pd.melt(week_5,id_vars=['Week','Name'],var_name='match_ID',value_name='pick_selection')
+week_6=pd.melt(week_6,id_vars=['Week','Name'],var_name='match_ID',value_name='pick_selection')
 # st.write('week 1',week_1.dtypes)
-all_weeks_picks_made=pd.concat([week_1,week_2,week_3,week_4,week_5])
+all_weeks_picks_made=pd.concat([week_1,week_2,week_3,week_4,week_5,week_6])
 all_weeks_picks_made['match_ID']=all_weeks_picks_made['match_ID'].astype(float)
 
 # st.write('picks listing',all_weeks_picks_made)
 # st.write(odds_pts_listing.dtypes)
 # st.write(football_results.dtypes)
+# st.write('odds listing pre merge', odds_pts_listing)
+# st.write('football results pre merge', football_results)
 master_listing=pd.merge(odds_pts_listing,football_results,on=['Date','Home Team','Away Team'],how='outer', indicator=True)
+# st.write('check to see if merge on football results is ok', master_listing[master_listing['match_ID']>80])
 master_listing['betting_favourite']=np.where(master_listing['Home_odds']<master_listing['Away_odds'],1,np.where(master_listing['Away_odds']<master_listing['Home_odds'],-1,0))
 master_listing['betting_favourite_name']=np.where(master_listing['Home_odds']<master_listing['Away_odds'],master_listing['Home Team'],
                                                   np.where(master_listing['Away_odds']<master_listing['Home_odds'],master_listing['Away Team'],"Pick 'em"))
@@ -151,14 +167,15 @@ updated_pick_listing['check_sum']=(updated_pick_listing.loc[:,['underdog_picked_
 # st.write('Selection', merged_check)
 
 # st.write('check for draws looks like it works', updated_pick_listing[updated_pick_listing['pick_id']==0])
-
+# st.write('updated pick listing to check pick pts', updated_pick_listing[updated_pick_listing['Week']==6])
 user_results=updated_pick_listing.groupby(['Week','Name']).agg(count_winning_picks=('pick_result','sum'),sum_winning_picks=('pick_pts','sum'),
         sum_favourite_picks=('favourite_picked_1','sum'),sum_underdog_picks=('underdog_picked_1','sum'),
         sum_draw_picks=('draw_picked_1','sum'),sum_pickem_picks=('pick_em_1','sum'),betting_result=('betting_profit_loss','sum'),betting_count=('betting_profit_loss','count'),betting_average=('betting_profit_loss','mean'))\
     .sort_values(by=['Week','sum_winning_picks'],ascending=[True,False]).reset_index()
+# st.write('check totals', check_totals)
 user_results=pd.merge(user_results,check_totals,how='outer',indicator=True)
 user_results['check_diff']=user_results['sum_winning_picks'] - user_results['total']
-
+# st.write('check the diff between totals',user_results[user_results['Week']==6])
 
 # source = data.barley()
 # st.write('source',source.head())
