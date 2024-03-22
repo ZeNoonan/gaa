@@ -10,12 +10,12 @@ from io import BytesIO
 
 st.set_page_config(layout="wide")
 
-odds_pts_listing = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date'])
+# odds_pts_listing = pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date'])
 
-pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date']).\
-    to_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
-odds_pts_listing=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
-# odds_pts_listing=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/odds_pts_listing.parq')
+# pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='odds_pts_listing',parse_dates=['Date']).\
+#     to_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
+# odds_pts_listing=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts_listing.parq')
+odds_pts_listing=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/odds_pts_listing.parq')
 
 # pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_1').\
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_1.parq')
@@ -27,8 +27,8 @@ odds_pts_listing=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/odds_pts
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_4.parq')
 # pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_5').\
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_5.parq')
-pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_6').\
-    to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_6.parq')
+# pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='week_6').\
+#     to_parquet('C:/Users/Darragh/Documents/Python/gaa/week_6.parq')
 # pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='check_totals').\
 #     to_parquet('C:/Users/Darragh/Documents/Python/gaa/check_totals.parq')
 
@@ -46,33 +46,33 @@ pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",she
 # week_3 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_3.parq")
 # week_4 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_4.parq")
 # week_5 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_5.parq")
-week_6 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_6.parq")
+# week_6 = pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/week_6.parq")
 week_1 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_1.parq")
 week_2 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_2.parq")
 week_3 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_3.parq")
 week_4 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_4.parq")
 week_5 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_5.parq")
+week_6 = pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/week_6.parq")
 
-pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='check_totals').\
-    to_parquet('C:/Users/Darragh/Documents/Python/gaa/check_totals.parq')
+# pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024.xlsx",sheet_name='check_totals').\
+#     to_parquet('C:/Users/Darragh/Documents/Python/gaa/check_totals.parq')
 check_totals=pd.read_parquet("https://raw.githubusercontent.com/ZeNoonan/gaa/master/check_totals.parq")
 # check_totals=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/gaa_football_2024_prov.xlsx",sheet_name='check_totals')
 
-check_totals=pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/check_totals.parq")
+# check_totals=pd.read_parquet("C:/Users/Darragh/Documents/Python/gaa/check_totals.parq")
 
 # st.write('week 1 before',week_1.dtypes)
 # st.write(week_1)
 
 # football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football 5_feb_24.xlsx",sheet_name='2024',header=0)\
 #     .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
-# football_results=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/football_results.parq')
+football_results=pd.read_parquet('https://raw.githubusercontent.com/ZeNoonan/gaa/master/football_results.parq')
 # football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football_2024_prov.xlsx",sheet_name='2024',header=0)\
 #     .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
-football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football_2024.xlsx",sheet_name='2024',header=0)\
-    .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
-# st.write('check football results local', football_results)
-football_results.to_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
-football_results=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
+# football_results=pd.read_excel("C:/Users/Darragh/Documents/Python/gaa/GAA Elo ratings - Football_2024.xlsx",sheet_name='2024',header=0)\
+#     .loc[:,['Date','Grade','Team 1','Sc','Team 2','Sc.1']].dropna(subset=['Date']).rename(columns={'Team 1':'Home Team','Team 2':'Away Team'})
+# football_results.to_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
+# football_results=pd.read_parquet('C:/Users/Darragh/Documents/Python/gaa/football_results.parq')
 # st.write('')
 football_results['home_win']=np.where(football_results['Sc']>football_results['Sc.1'],1,np.where(football_results['Sc']<football_results['Sc.1'],-1,0))
 # st.write('check football results', football_results)
